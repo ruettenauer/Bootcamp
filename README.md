@@ -6,6 +6,6 @@ This is a short-course on Quantitative Methods
 
 ## Materials
 
-to be hosted on a server
+Please see [html slides here](https://ruettenauer.github.io/Bootcamp/Bootcamp_slides.html)
 
 ---

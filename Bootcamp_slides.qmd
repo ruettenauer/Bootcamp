@@ -384,7 +384,7 @@ pl
 ```
 
 
-## An Example
+## An Example I
 
 ```{r}
 #| echo: true
@@ -409,7 +409,41 @@ pl3 <- ggplot(wd.df, aes(x = gdp_pc, y = co2_pc, size = population, color = regi
   geom_smooth(aes(group = 1), method = 'lm', show.legend = "none") + 
   geom_point(alpha = 0.5) + 
   theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) +
-  labs(y = "CO2 emissions per capita", x = "GDP per capita")
+  labs(y = "CO2 emissions per capita", x = "GDP per capita") +
+  ggtitle(paste("Pearsons correlation = ", round(cor, 3)))
 
 pl3
 ```
+
+
+## An Example II
+
+```{r}
+#| echo: true
+#| code-fold: true
+
+# use log transformed variables
+wd.df$ln_population <- log(wd.df$population)
+wd.df$ln_co2_pc <- log(wd.df$co2_pc)
+
+# calculate covariance
+cov <- cov(wd.df$ln_population, wd.df$ln_co2_pc, use = "complete.obs")
+
+# sd
+sd_gdp <- sd(wd.df$ln_population, na.rm = TRUE)
+sd_co2 <- sd(wd.df$ln_co2_pc, na.rm = TRUE)
+
+# correlation
+cor <- cor(wd.df$ln_population, wd.df$ln_co2_pc, use = "complete.obs")
+
+# Plot with linear line
+pl3 <- ggplot(wd.df, aes(x = population, y = co2_pc, size = population, color = region)) +
+  geom_smooth(aes(group = 1), method = 'lm', show.legend = "none") + 
+  geom_point(alpha = 0.5) + 
+  theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) +
+  labs(y = "CO2 emissions per capita", x = "Population") +
+  ggtitle(paste("Pearsons correlation = ", round(cor, 3)))
+
+pl3
+```
+
