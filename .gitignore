@@ -1,0 +1,11 @@
+*.Rproj.user
+*.Rproj
+*.Rhistory
+*.RData
+*.Ruserdata
+_data/*
+!_data/msoa_spatial.RData
+cache/
+Literature/
+**/*_cache
+.Rproj.user

@@ -1,0 +1,337 @@
+---
+title: "Quantitative Methods Bootcamp"
+author: "Rocio Mendez Pineda & Tobias Rüttenauer"
+format: revealjs
+date: "2023-09-28"
+execute:
+  freeze: auto  # re-render only when source changes
+---
+
+## Before We Start
+
+* Log into your computer with your SSO
+
+* Go to the pre-sessional Moodle page and download: 
+  + The slides for this bootcamp 
+  + The dataset we will use (“WDI_Data.dta”)
+
+* Make sure to save the dataset in an easy-to-access folder
+  + A place you can also access from elsewhere (e.g., N-drive) 
+  
+  
+## Objectives of This Bootcamp
+
+#### Overarching goal
+
+Be on common starting point + ready to take on the quantitative MSc modules
+
+::: {.incremental}
+* Refresh key statistical concepts 
+  - E.g., sampling distributions, hypothesis testing 
+* Obtain basic familiarity with R & Stata 
+:::
+
+
+## Statistical Inference
+  
+Statistical inference is used to learn from incomplete data
+
+. . .
+
+We wish to learn some characteristics of a population (e.g., the mean and standard deviation of the heights of all women in the UK), which we must estimate from a sample or subset of that population
+
+. . .
+
+### Two types of inference:
+
+::: {.incremental}
+1) __Descriptive inference__: What is going on, or what exists? 
+2) __Causal inference__: Why is something going on, why does it exist? 
+:::
+
+
+## Example data {.scrollable}
+
+The code below loads the WDI packages and searches for an indicator on CO2 per capita.
+
+```{r example_wdi_1}
+#| echo: true
+
+# load package
+library(WDI)
+
+# Search GDP per capita
+WDIsearch("CO2.*capita")
+
+```
+
+The code below uses the WDI API to retrieve the data and creates a dataframe of three indicators.
+
+```{r example_wdi_2, eval=TRUE, warning=FALSE}
+#| echo: true
+
+# Define countries, indicators form above, and time period
+wd.df <- WDI(country = "all", 
+             indicator = c('population' = "SP.POP.TOTL", 
+                           'gdp_pc' = "NY.GDP.PCAP.KD", 
+                           'co2_pc' = "EN.ATM.CO2E.PC"),
+             extra = TRUE,
+             start = 2019, end = 2019)
+
+# Drop all country aggregrates
+wd.df <- wd.df[which(wd.df$region != "Aggregates"), ]
+```
+
+
+## Descriptive Inference
+
+```{r wdi_plot1, message=FALSE, warning=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "expand for full code"
+
+library(ggplot2)
+pl <- ggplot(wd.df, aes(x = gdp_pc, y = co2_pc, size = population, color = region)) +
+  geom_point(alpha = 0.5) + 
+  theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) +
+  labs(y = "CO2 emissions per capita", x = "GDP per capita")
+
+pl
+```
+
+__Descriptive__: What are the average CO2 emissions of all highly populated countries countries?
+
+
+## Causal Inference
+
+```{r wdi_plot2, message=FALSE, warning=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "expand for full code"
+
+pl2 <- ggplot(wd.df, aes(x = gdp_pc, y = co2_pc, size = population, color = region)) +
+  geom_smooth(aes(group = 1), show.legend = "none") + geom_point(alpha = 0.5) + 
+  theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) +
+  labs(y = "CO2 emissions per capita", x = "GDP per capita")
+
+pl2
+```
+
+__Causal__: How does GDP influence the amount of CO2 emissions?
+
+
+## Variables and Observations  {.smaller}
+
+A [variable]{style="color: red;"} is anything that can vary across units of analysis: it is a characteristic that can have multiple values
+
+* E.g., sex, age, diameter, financial revenue, temperature
+
+. . .
+
+A [unit of analysis]{style="color: blue;"} is the major entity that you analyse
+
+*	E.g., individuals, objects, schools, countries
+
+. . .
+
+An [observation]{style="color: purple;"} is the value of a particular variable for a particular unit (sometimes a unit is in its entirety referred to as observation)
+
+*	E.g., the [individual]{style="color: blue;"} King Charles III is [73 years]{style="color: purple;"} of [age]{style="color: red;"}
+
+
+## Different Types of Variables {.smaller}
+
+#### Continuous / interval-ratio variables: 
+
+They have an ordering, they can take on infinitely many values, and you can do calculations with them
+
+::: {.fragment .fade-in}
+* E.g., income, age, weight, minutes
+:::
+
+::: {.fragment .fade-in}
+#### Categorical variables: 
+
+Each observation belongs to one out of a fixed number of categories 
+
+* Ordinal variables: there is a natural ordering of the categories
+* Nominal variables: there is no natural ordering of the categories
+
+::: {.fragment .fade-in}
+  - E.g., education level, Likert scales, gender, vote choice
+:::
+:::
+
+# Describing variables
+
+## Decribing variables
+
+Describing data is necessary because there is usually too much of it, so it does not make any sense to look at every data point
+
+We thus have to look for ways to summarize central tendencies, variation, and relationships that exist in the data
+
+There are many different ways to do this
+
+::: {.incremental}
+1) Visual depictions
+2) Numerical descriptions
+  - E.g. mean, mode, median, standard deviation
+:::
+
+
+## Distribution
+
+Variables can be characterized by their __frequency distribution__: 
+
+The distribution of the (relative) frequencies of their values  
+
+  - E.g., we can graph the world income distribution:
+
+## {auto-animate=true}
+
+```{r distributions1, message=FALSE, warning=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "expand for full code"
+
+p <- ggplot(wd.df, aes(x = gdp_pc)) + geom_density() + 
+  labs(y = "Density", x = "GDP per capita") + theme_bw()
+p
+```
+
+## Distributions: Examples
+
+* Normal distribution
+
+* Chi-squared distribution
+
+## {auto-animate=true}
+
+```{r distributions2, message=FALSE, warning=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "expand for full code"
+
+# Seed for random number
+set.seed(12345)
+
+# Normal distribution
+d1 <- data.frame(x = rnorm(10000, 0, 1), dist = "mean = 0, sd = 1")
+d2 <- data.frame(x = rnorm(10000, 1, 1), dist = "mean = 1, sd = 1")
+d3 <- data.frame(x = rnorm(10000, 0, 2), dist = "mean = 0, sd = 2")
+
+p <- ggplot(rbind(d1, d2, d3), aes(x = x)) + 
+  geom_density(aes(color = dist, linetype = dist), size = 1.5) + 
+  labs(y = "Density", x = "Variable x") + theme_bw() +
+  ggtitle("Normal distribution")
+p
+```
+
+## {auto-animate=true}
+
+```{r distributions3, message=FALSE, warning=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "expand for full code"
+
+# Chi Squared distribution
+d2 <- data.frame(x = rchisq(10000, 2), dist = "df = 2")
+d3 <- data.frame(x = rchisq(10000, 4), dist = "df = 4")
+d4 <- data.frame(x = rchisq(10000, 8), dist = "df = 8")
+
+p <- ggplot(rbind(d2, d3, d4), aes(x = x)) + 
+  geom_density(aes(color = dist, linetype = dist), size = 1.5) + 
+  labs(y = "Density", x = "Variable x") + theme_bw() +
+  ggtitle("Chi-squared distribution")
+p
+```
+
+## {auto-animate=true}
+
+#### Distributions can take on many different shapes
+
+![](figs/Picture1.png)
+
+
+## Measures of Central Tendency {.smaller}
+
+__Mean__: conventional average calculated by adding all values for all units and dividing by the number of units
+
+$$\overline{x}=\frac{1}{n} \sum_{i=1}^{n} x_{i}=\frac{1}{n}\left(x_{1}+\cdots+x_{n}\right), \mathrm{with~units~}i = (1, 2, \dots, n)$$
+
+* May give a distorted impression if there are outliers
+
+. . .
+
+__Median__: value that falls in the middle if we order all units by their value on the variable
+
+. . .
+
+__Mode__: most frequently occurring value across all units
+
+
+## Measures of Dispersion  {.smaller}
+
+__Variance__: average of the squared differences between each observed value on a variable and its mean 
+$$
+\sigma^2 = \frac{1}{n} \sum_{i=1}^n (x_i - \bar{x})^2
+$$
+
+* Why the square? To treat + and – differences alike
+
+. . .
+
+__Standard deviation__: average departure of the observed values on a variable from its mean
+
+$$
+\sigma = \sqrt{\frac{1}{n} \sum_{i=1}^n (x_i - \bar{x})^2}
+$$
+
+* It is the square root of the variance; it “reverts” the square-taking in the variance calculation, to bring the statistic back to the original scale of the variable
+
+
+## Notation {.smaller}
+
+Typically, we use Roman letters for sample statistics and Greek letters for population statistics:
+
+* Sample mean $= \bar{x}$ population mean $= \mu$
+* Sample variance $= s^2$, population variance $= \sigma^2$
+* Sample standard error $= s$, population standard deviation $= \sigma$ 
+
+Recall: the sample is what we observe, the population is what we want to make inferences about
+
+
+
+# Decribing relationships
+
+## Decribing relationships
+
+Often, we are not just interested in the distribution of a single variable. ^[Yeah, you could have spend the last 30 minutes on instagram!]
+
+. . .
+
+Instead, we are interested in __relationships__ between several variables. If there is a relationship between variable, knowing one variable can tell you something about the other variable.
+
+::: {.incremental}
+* Age and height
+* GDP and CO2 emissions
+* Education and income
+:::
+
+## Hypothesis testing 
+
+A hypothesis is a theory-based statement about a relationship that we expect to observe
+
+* E.g., girls achieve higher scores than boys on reading tests 
+
+. . .
+
+For every hypothesis there is a corresponding null hypothesis about what we would expect if our theory is incorrect
+
+. . .
+
+* E.g., there is no association between Y and X in the population
+* In our example: girls are not better readers than boys 
+
+
+
