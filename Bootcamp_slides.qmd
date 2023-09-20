@@ -80,6 +80,9 @@ wd.df <- WDI(country = "all",
 
 # Drop all country aggregrates
 wd.df <- wd.df[which(wd.df$region != "Aggregates"), ]
+
+# Save data
+save(wd.df, file = "WDI_short.RData")
 ```
 
 
@@ -334,4 +337,79 @@ For every hypothesis there is a corresponding null hypothesis about what we woul
 * In our example: girls are not better readers than boys 
 
 
+## Covariance {.smaller}
 
+__Covariance__ refers to the idea that the pattern of variation for one variable corresponds to the pattern of variation for another variable: the two variables “vary together” 
+
+Statistically speaking, covariance is the multiplication of the deviations from the mean for the first variables and the deviations from the mean for the second variable:
+
+$$cov_{x,y}=\frac{1}{n}\sum_{i=1}^{n}(x_{i}-\bar{x})(y_{i}-\bar{y})$$
+
+::: {.incremental}
+* The covariance tells us the direction of an association: + or – 
+* It does not tell us about the strength of the association (reference to underlying distributions of variables is missing)
+:::
+
+
+
+## Pearson’s Correlation {.smaller}
+
+For continuous data, we can calculate Pearson's correlation ($\rho$)
+
+* $\rho$ measures strength & direction of association for linear trends
+* $\rho$ rescales the covariance to the underlying distributions of the variables involved:
+
+$$ \rho = \frac{cov_{x,y}}{\sigma_X \sigma_Y} = 
+\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})(y_{i}-\bar{y})}
+{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2} \sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}}$$
+
+. . .
+
+Dividing the covariance by the product of the standard deviations normalizes the covariance to a range from -1 to +1
+
+::: {.incremental}
+* -1 = perfectly negative correlation (all points on decreasing line)
+* +1 = perfectly positive correlation (all points on increasing line)
+* 0 = no correlation (random cloud of points)
+* Correlation is weaker closer to 0 and stronger closer to +/-1
+:::
+
+
+## An Example
+
+```{r}
+#| echo: true
+#| code-fold: true
+pl
+```
+
+
+## An Example
+
+```{r}
+#| echo: true
+#| code-fold: true
+
+# use log transformed variables
+wd.df$ln_gdp_pc <- log(wd.df$gdp_pc)
+wd.df$ln_co2_pc <- log(wd.df$co2_pc)
+
+# calculate covariance
+cov <- cov(wd.df$ln_gdp_pc, wd.df$ln_co2_pc, use = "complete.obs")
+
+# sd
+sd_gdp <- sd(wd.df$ln_gdp_pc, na.rm = TRUE)
+sd_co2 <- sd(wd.df$ln_co2_pc, na.rm = TRUE)
+
+# correlation
+cor <- cor(wd.df$ln_gdp_pc, wd.df$ln_co2_pc, use = "complete.obs")
+
+# Plot with linear line
+pl3 <- ggplot(wd.df, aes(x = gdp_pc, y = co2_pc, size = population, color = region)) +
+  geom_smooth(aes(group = 1), method = 'lm', show.legend = "none") + 
+  geom_point(alpha = 0.5) + 
+  theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) +
+  labs(y = "CO2 emissions per capita", x = "GDP per capita")
+
+pl3
+```

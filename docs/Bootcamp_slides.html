@@ -479,7 +479,10 @@ Rocio Mendez Pineda &amp; Tobias Rüttenauer
 <span id="cb3-7"><a href="#cb3-7"></a>             <span class="at">start =</span> <span class="dv">2019</span>, <span class="at">end =</span> <span class="dv">2019</span>)</span>
 <span id="cb3-8"><a href="#cb3-8"></a></span>
 <span id="cb3-9"><a href="#cb3-9"></a><span class="co"># Drop all country aggregrates</span></span>
-<span id="cb3-10"><a href="#cb3-10"></a>wd.df <span class="ot">&lt;-</span> wd.df[<span class="fu">which</span>(wd.df<span class="sc">$</span>region <span class="sc">!=</span> <span class="st">"Aggregates"</span>), ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-10"><a href="#cb3-10"></a>wd.df <span class="ot">&lt;-</span> wd.df[<span class="fu">which</span>(wd.df<span class="sc">$</span>region <span class="sc">!=</span> <span class="st">"Aggregates"</span>), ]</span>
+<span id="cb3-11"><a href="#cb3-11"></a></span>
+<span id="cb3-12"><a href="#cb3-12"></a><span class="co"># Save data</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="fu">save</span>(wd.df, <span class="at">file =</span> <span class="st">"WDI_short.RData"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="descriptive-inference" class="slide level2">
@@ -726,9 +729,84 @@ Rocio Mendez Pineda &amp; Tobias Rüttenauer
 <li>E.g., there is no association between Y and X in the population</li>
 <li>In our example: girls are not better readers than boys</li>
 </ul>
-<div class="footer footer-default">
+</div>
+</section>
+<section id="covariance" class="slide level2 smaller">
+<h2>Covariance</h2>
+<p><strong>Covariance</strong> refers to the idea that the pattern of variation for one variable corresponds to the pattern of variation for another variable: the two variables “vary together”</p>
+<p>Statistically speaking, covariance is the multiplication of the deviations from the mean for the first variables and the deviations from the mean for the second variable:</p>
+<p><span class="math display">\[cov_{x,y}=\frac{1}{n}\sum_{i=1}^{n}(x_{i}-\bar{x})(y_{i}-\bar{y})\]</span></p>
+<div>
+<ul>
+<li class="fragment">The covariance tells us the direction of an association: + or –</li>
+<li class="fragment">It does not tell us about the strength of the association (reference to underlying distributions of variables is missing)</li>
+</ul>
+</div>
+</section>
+<section id="pearsons-correlation" class="slide level2 smaller">
+<h2>Pearson’s Correlation</h2>
+<p>For continuous data, we can calculate Pearson’s correlation (<span class="math inline">\(\rho\)</span>)</p>
+<ul>
+<li><span class="math inline">\(\rho\)</span> measures strength &amp; direction of association for linear trends</li>
+<li><span class="math inline">\(\rho\)</span> rescales the covariance to the underlying distributions of the variables involved:</li>
+</ul>
+<p><span class="math display">\[ \rho = \frac{cov_{x,y}}{\sigma_X \sigma_Y} =
+\frac{\sum_{i=1}^{n}(x_{i}-\bar{x})(y_{i}-\bar{y})}
+{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2} \sqrt{\sum_{i=1}^n (y_i - \bar{y})^2}}\]</span></p>
+<div class="fragment">
+<p>Dividing the covariance by the product of the standard deviations normalizes the covariance to a range from -1 to +1</p>
+<div>
+<ul>
+<li class="fragment">-1 = perfectly negative correlation (all points on decreasing line)</li>
+<li class="fragment">+1 = perfectly positive correlation (all points on increasing line)</li>
+<li class="fragment">0 = no correlation (random cloud of points)</li>
+<li class="fragment">Correlation is weaker closer to 0 and stronger closer to +/-1</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="an-example" class="slide level2">
+<h2>An Example</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>pl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 
 </div>
+<img data-src="Bootcamp_slides_files/figure-revealjs/unnamed-chunk-1-1.png" width="960" class="r-stretch"></section>
+<section id="an-example-1" class="slide level2">
+<h2>An Example</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># use log transformed variables</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a>wd.df<span class="sc">$</span>ln_gdp_pc <span class="ot">&lt;-</span> <span class="fu">log</span>(wd.df<span class="sc">$</span>gdp_pc)</span>
+<span id="cb10-3"><a href="#cb10-3"></a>wd.df<span class="sc">$</span>ln_co2_pc <span class="ot">&lt;-</span> <span class="fu">log</span>(wd.df<span class="sc">$</span>co2_pc)</span>
+<span id="cb10-4"><a href="#cb10-4"></a></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="co"># calculate covariance</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a>cov <span class="ot">&lt;-</span> <span class="fu">cov</span>(wd.df<span class="sc">$</span>ln_gdp_pc, wd.df<span class="sc">$</span>ln_co2_pc, <span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7"></a></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="co"># sd</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a>sd_gdp <span class="ot">&lt;-</span> <span class="fu">sd</span>(wd.df<span class="sc">$</span>ln_gdp_pc, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-10"><a href="#cb10-10"></a>sd_co2 <span class="ot">&lt;-</span> <span class="fu">sd</span>(wd.df<span class="sc">$</span>ln_co2_pc, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-11"><a href="#cb10-11"></a></span>
+<span id="cb10-12"><a href="#cb10-12"></a><span class="co"># correlation</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a>cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(wd.df<span class="sc">$</span>ln_gdp_pc, wd.df<span class="sc">$</span>ln_co2_pc, <span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
+<span id="cb10-14"><a href="#cb10-14"></a></span>
+<span id="cb10-15"><a href="#cb10-15"></a><span class="co"># Plot with linear line</span></span>
+<span id="cb10-16"><a href="#cb10-16"></a>pl3 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(wd.df, <span class="fu">aes</span>(<span class="at">x =</span> gdp_pc, <span class="at">y =</span> co2_pc, <span class="at">size =</span> population, <span class="at">color =</span> region)) <span class="sc">+</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">group =</span> <span class="dv">1</span>), <span class="at">method =</span> <span class="st">'lm'</span>, <span class="at">show.legend =</span> <span class="st">"none"</span>) <span class="sc">+</span> </span>
+<span id="cb10-18"><a href="#cb10-18"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb10-19"><a href="#cb10-19"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> <span class="fu">scale_y_log10</span>() <span class="sc">+</span>  <span class="fu">scale_x_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">dollar_format</span>()) <span class="sc">+</span></span>
+<span id="cb10-20"><a href="#cb10-20"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"CO2 emissions per capita"</span>, <span class="at">x =</span> <span class="st">"GDP per capita"</span>)</span>
+<span id="cb10-21"><a href="#cb10-21"></a></span>
+<span id="cb10-22"><a href="#cb10-22"></a>pl3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+
+</div>
+<img data-src="Bootcamp_slides_files/figure-revealjs/unnamed-chunk-2-1.png" width="960" class="r-stretch"><div class="footer footer-default">
+
 </div>
 </section></section>
 
