@@ -556,7 +556,7 @@ After entering a command, you select it, and then click the “execute” button
 ![](figs/R1.png)	
 
 
-# Structure of Commands
+# Structure of Commands in Stata
 
 ## General Stata Command Syntax
 
@@ -592,6 +592,9 @@ In nearly all cases, Stata syntax consists of four parts:
 ```{.stata}
 help summarize
 ```
+
+
+# Structure of Commands in R
 
 
 ## General R Workflow
