@@ -9,9 +9,9 @@ execute:
 
 ## Before We Start
 
-* Log into your computer with your SSO
+* Go to: [https://github.com/ruettenauer/Bootcamp](https://github.com/ruettenauer/Bootcamp)
 
-* Go to the pre-sessional Moodle page and download: 
+* Download: 
   + The slides for this bootcamp 
   + The dataset we will use (“WDI_Data.dta”)
 
@@ -447,3 +447,263 @@ pl3 <- ggplot(wd.df, aes(x = population, y = co2_pc, size = population, color = 
 pl3
 ```
 
+
+# Statistical Software
+
+## Statistical software
+
+__Stata__ & __R__ are powerful software packages that allows you to do: 
+
+* Data management and manipulation
+* Data visualization 
+* Statistical analysis
+
+. . .
+
+* (Writing papers and presentations)
+
+. . .
+
+Writing Stata syntax files and R script facilitates __reproducibility__
+
+
+## Stata’s Interface: Variables Window {.smaller}
+
+The variables window displays all variables in your dataset 
+
+![](figs/Stata1.png)
+
+* Single click on variable names to see details in properties window
+* Double click to make variables appear in command window
+
+
+## Stata’s Interface: Properties Window {.smaller}
+
+The variables window displays all variables in your dataset 
+
+![](figs/Stata2.png)
+
+The properties window displays details about selected variables as well as the entire dataset (e.g., number of observations, sort order)
+
+
+## Stata’s Interface: Command Window {.smaller}
+
+![](figs/Stata3.png)
+
+The command window is for entering and executing commands
+
+* But it is better to use do-files (same applies to drop-down menus)
+
+
+## Stata’s Interface: Results Window  {.smaller}
+
+![](figs/Stata4.png)
+
+The results window displays all output of your commands
+
+
+## Stata’s Interface: Command History and Current Working Directory {.smaller}
+
+![](figs/Stata5.png)
+
+The command history window lists previously run commands 
+
+* At the bottom you can see the current working directory: the folder where any files will be loaded from and saved to
+
+
+## Stata’s Interface: Opening a Do File {.smaller}
+
+![](figs/Stata6.png)
+
+Do files are text files where you can store commands for reuse
+
+* Huge payoffs for reproducibility, debugging, adapting commands
+
+
+## Running Commands from a Do File {.smaller}
+
+![](figs/Stata7.png)
+
+After entering a command, you select it, and then click the “execute” button or press “Ctrl+D”
+
+
+## Do File Dos and Don’ts {.smaller}
+
+![](figs/Stata8.png)
+
+1. Use annotations to facilitate replicability (incl. for future self!):
+	* Use * for single-line comments and /* */ for multiple lines 
+
+## {auto-animate=true .smaller}
+	
+![](figs/Stata9.png)	
+
+2. Break down code into clearly labelled sections / subsections
+3. Use tab indentations to making things easy to read
+
+## {auto-animate=true .smaller}
+
+![](figs/Stata10.png)	
+
+4. Don’t put too much information on a single line
+
+* Use /// to continue your command on the next line and 
+* write “top-to-bottom” instead of “left-to-right” 
+
+
+## R & R Studio Interface
+
+![](figs/R1.png)	
+
+
+# Structure of Commands
+
+## General Stata Command Syntax
+
+![](figs/Stata11.png)
+
+Stata commands mirror everyday commands in their structure:
+
+::: {.incremental}
+* They often start with a verb: “Bring me…” 
+* They then list an object: “… a pint of milk…”
+* They may add a condition: “… if it is still before noon…” 
+* They may specify further details after the comma: “, quickly please” or “, I want semi-skimmed”
+:::
+
+## {auto-animate=true}
+
+![](figs/Stata11.png)
+
+In nearly all cases, Stata syntax consists of four parts: 
+
+::: {.incremental}
+* __Command__: What action do you want to see performed? 
+* __Names of variables__, files, objects: On what objects is the command to be performed (“varlist”)
+* __Qualifier(s) on observations__: Which observations are to be taken into account (and how)? (“if”, “in”, “weight”)
+* __Options__: What special things should be done in the execution?
+:::
+
+
+## "help [command]" is your friend
+
+![](figs/Stata12.png)
+
+```{.stata}
+help summarize
+```
+
+
+## General R Workflow
+
+
+```{.r code-line-numbers="1"}
+object_name <- value
+
+# Example
+a <- 3
+b <- 4
+c <- a + b
+c
+```
+
+* Assign a value to an object
+
+## General R Workflow
+
+```{.r code-line-numbers="4,5"}
+object_name <- value
+
+# Example
+a <- 3
+b <- 4
+c <- a + b
+c
+```
+
+* Define the objects a and b
+
+## General R Workflow
+
+```{.r code-line-numbers="6"}
+object_name <- value
+
+# Example
+a <- 3
+b <- 4
+c <- a + b
+c
+```
+
+* Perform an operations with them
+
+```{r}
+#| echo: false
+value <- "this can be anything"
+```
+
+
+## General R Workflow
+
+```{r example1}
+#| code-line-numbers: "7"
+#| echo: true
+object_name <- value
+
+# Example
+a <- 3
+b <- 4
+c <- a + b
+c
+```
+
+* Return the results
+
+
+## General R Syntax
+
+```{.r}
+function_name(arg1 = val1[which()], arg2 = val2[which()], option1 = val3, ...)
+```
+
+::: {.incremental}
+* __function_name__: What action do you want to see performed? 
+* __args__, files, objects: On what objects is the command to be performed 
+* __Qualifier(s) on observations__: Which observations are to be taken into account (and how)? (“which”)
+* __options__: What special things should be done in the execution?
+:::
+
+
+## General R Syntax
+
+Produce a sequence between 0 and 10 with 20 values
+
+```{r}
+#| echo: true
+y <- seq(0, 10, length.out = 20)
+y
+```
+
+Calculate the mean
+
+```{r}
+#| echo: true
+mean(y)
+```
+
+Calculate the mean of all values above 5
+
+```{r}
+#| echo: true
+mean(y[which(y >= 5)])
+```
+
+
+
+## "?[command]" is your friend
+
+![](figs/R2.png)
+
+```{.r}
+?seq
+```

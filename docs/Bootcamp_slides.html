@@ -406,8 +406,8 @@ Rocio Mendez Pineda &amp; Tobias Rüttenauer
 <section id="before-we-start" class="slide level2">
 <h2>Before We Start</h2>
 <ul>
-<li><p>Log into your computer with your SSO</p></li>
-<li><p>Go to the pre-sessional Moodle page and download:</p>
+<li><p>Go to: <a href="https://github.com/ruettenauer/Bootcamp">https://github.com/ruettenauer/Bootcamp</a></p></li>
+<li><p>Download:</p>
 <ul>
 <li>The slides for this bootcamp</li>
 <li>The dataset we will use (“WDI_Data.dta”)</li>
@@ -838,7 +838,249 @@ Rocio Mendez Pineda &amp; Tobias Rüttenauer
 </details>
 
 </div>
-<img data-src="Bootcamp_slides_files/figure-revealjs/unnamed-chunk-3-1.png" width="960" class="r-stretch"><div class="footer footer-default">
+<img data-src="Bootcamp_slides_files/figure-revealjs/unnamed-chunk-3-1.png" width="960" class="r-stretch"></section></section>
+<section>
+<section id="statistical-software" class="title-slide slide level1 center">
+<h1>Statistical Software</h1>
+
+</section>
+<section id="statistical-software-1" class="slide level2">
+<h2>Statistical software</h2>
+<p><strong>Stata</strong> &amp; <strong>R</strong> are powerful software packages that allows you to do:</p>
+<ul>
+<li>Data management and manipulation</li>
+<li>Data visualization</li>
+<li>Statistical analysis</li>
+</ul>
+<div class="fragment">
+<ul>
+<li>(Writing papers and presentations)</li>
+</ul>
+</div>
+<div class="fragment">
+<p>Writing Stata syntax files and R script facilitates <strong>reproducibility</strong></p>
+</div>
+</section>
+<section id="statas-interface-variables-window" class="slide level2 smaller">
+<h2>Stata’s Interface: Variables Window</h2>
+<p>The variables window displays all variables in your dataset</p>
+
+<img data-src="figs/Stata1.png" class="r-stretch"><ul>
+<li>Single click on variable names to see details in properties window</li>
+<li>Double click to make variables appear in command window</li>
+</ul>
+</section>
+<section id="statas-interface-properties-window" class="slide level2 smaller">
+<h2>Stata’s Interface: Properties Window</h2>
+<p>The variables window displays all variables in your dataset</p>
+
+<img data-src="figs/Stata2.png" class="r-stretch"><p>The properties window displays details about selected variables as well as the entire dataset (e.g., number of observations, sort order)</p>
+</section>
+<section id="statas-interface-command-window" class="slide level2 smaller">
+<h2>Stata’s Interface: Command Window</h2>
+
+<img data-src="figs/Stata3.png" class="r-stretch"><p>The command window is for entering and executing commands</p>
+<ul>
+<li>But it is better to use do-files (same applies to drop-down menus)</li>
+</ul>
+</section>
+<section id="statas-interface-results-window" class="slide level2 smaller">
+<h2>Stata’s Interface: Results Window</h2>
+
+<img data-src="figs/Stata4.png" class="r-stretch"><p>The results window displays all output of your commands</p>
+</section>
+<section id="statas-interface-command-history-and-current-working-directory" class="slide level2 smaller">
+<h2>Stata’s Interface: Command History and Current Working Directory</h2>
+
+<img data-src="figs/Stata5.png" class="r-stretch"><p>The command history window lists previously run commands</p>
+<ul>
+<li>At the bottom you can see the current working directory: the folder where any files will be loaded from and saved to</li>
+</ul>
+</section>
+<section id="statas-interface-opening-a-do-file" class="slide level2 smaller">
+<h2>Stata’s Interface: Opening a Do File</h2>
+
+<img data-src="figs/Stata6.png" class="r-stretch"><p>Do files are text files where you can store commands for reuse</p>
+<ul>
+<li>Huge payoffs for reproducibility, debugging, adapting commands</li>
+</ul>
+</section>
+<section id="running-commands-from-a-do-file" class="slide level2 smaller">
+<h2>Running Commands from a Do File</h2>
+
+<img data-src="figs/Stata7.png" class="r-stretch"><p>After entering a command, you select it, and then click the “execute” button or press “Ctrl+D”</p>
+</section>
+<section id="do-file-dos-and-donts" class="slide level2 smaller">
+<h2>Do File Dos and Don’ts</h2>
+
+<img data-src="figs/Stata8.png" class="r-stretch"><ol type="1">
+<li>Use annotations to facilitate replicability (incl.&nbsp;for future self!):
+<ul>
+<li>Use * for single-line comments and /* */ for multiple lines</li>
+</ul></li>
+</ol>
+</section>
+<section id="section-4" class="slide level2 smaller" data-auto-animate="true">
+<h2 data-id="quarto-animate-title"></h2>
+
+<img data-src="figs/Stata9.png" class="r-stretch"><ol start="2" type="1">
+<li>Break down code into clearly labelled sections / subsections</li>
+<li>Use tab indentations to making things easy to read</li>
+</ol>
+</section>
+<section id="section-5" class="slide level2 smaller" data-auto-animate="true">
+<h2 data-id="quarto-animate-title"></h2>
+
+<img data-src="figs/Stata10.png" class="r-stretch"><ol start="4" type="1">
+<li>Don’t put too much information on a single line</li>
+</ol>
+<ul>
+<li>Use /// to continue your command on the next line and</li>
+<li>write “top-to-bottom” instead of “left-to-right”</li>
+</ul>
+</section>
+<section id="r-r-studio-interface" class="slide level2">
+<h2>R &amp; R Studio Interface</h2>
+
+<img data-src="figs/R1.png" class="r-stretch"></section></section>
+<section>
+<section id="structure-of-commands" class="title-slide slide level1 center">
+<h1>Structure of Commands</h1>
+
+</section>
+<section id="general-stata-command-syntax" class="slide level2">
+<h2>General Stata Command Syntax</h2>
+
+<img data-src="figs/Stata11.png" class="r-stretch"><p>Stata commands mirror everyday commands in their structure:</p>
+<div>
+<ul>
+<li class="fragment">They often start with a verb: “Bring me…”</li>
+<li class="fragment">They then list an object: “… a pint of milk…”</li>
+<li class="fragment">They may add a condition: “… if it is still before noon…”</li>
+<li class="fragment">They may specify further details after the comma: “, quickly please” or “, I want semi-skimmed”</li>
+</ul>
+</div>
+</section>
+<section id="section-6" class="slide level2" data-auto-animate="true">
+<h2 data-id="quarto-animate-title"></h2>
+
+<img data-src="figs/Stata11.png" class="r-stretch"><p>In nearly all cases, Stata syntax consists of four parts:</p>
+<div>
+<ul>
+<li class="fragment"><strong>Command</strong>: What action do you want to see performed?</li>
+<li class="fragment"><strong>Names of variables</strong>, files, objects: On what objects is the command to be performed (“varlist”)</li>
+<li class="fragment"><strong>Qualifier(s) on observations</strong>: Which observations are to be taken into account (and how)? (“if”, “in”, “weight”)</li>
+<li class="fragment"><strong>Options</strong>: What special things should be done in the execution?</li>
+</ul>
+</div>
+</section>
+<section id="help-command-is-your-friend" class="slide level2">
+<h2>“help [command]” is your friend</h2>
+
+<img data-src="figs/Stata12.png" class="r-stretch"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource stata number-lines code-with-copy"><code class="sourceCode stata"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">help</span> <span class="kw">summarize</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="general-r-workflow" class="slide level2">
+<h2>General R Workflow</h2>
+<div class="sourceCode" id="cb13" data-code-line-numbers="1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>object_name <span class="ot">&lt;-</span> value</span>
+<span id="cb13-2"><a href="#cb13-2"></a></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="co"># Example</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a>a <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a>b <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb13-6"><a href="#cb13-6"></a>c <span class="ot">&lt;-</span> a <span class="sc">+</span> b</span>
+<span id="cb13-7"><a href="#cb13-7"></a>c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Assign a value to an object</li>
+</ul>
+</section>
+<section id="general-r-workflow-1" class="slide level2">
+<h2>General R Workflow</h2>
+<div class="sourceCode" id="cb14" data-code-line-numbers="4,5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>object_name <span class="ot">&lt;-</span> value</span>
+<span id="cb14-2"><a href="#cb14-2"></a></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="co"># Example</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a>a <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb14-5"><a href="#cb14-5"></a>b <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb14-6"><a href="#cb14-6"></a>c <span class="ot">&lt;-</span> a <span class="sc">+</span> b</span>
+<span id="cb14-7"><a href="#cb14-7"></a>c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Define the objects a and b</li>
+</ul>
+</section>
+<section id="general-r-workflow-2" class="slide level2">
+<h2>General R Workflow</h2>
+<div class="sourceCode" id="cb15" data-code-line-numbers="6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>object_name <span class="ot">&lt;-</span> value</span>
+<span id="cb15-2"><a href="#cb15-2"></a></span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="co"># Example</span></span>
+<span id="cb15-4"><a href="#cb15-4"></a>a <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a>b <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb15-6"><a href="#cb15-6"></a>c <span class="ot">&lt;-</span> a <span class="sc">+</span> b</span>
+<span id="cb15-7"><a href="#cb15-7"></a>c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Perform an operations with them</li>
+</ul>
+</section>
+<section id="general-r-workflow-3" class="slide level2">
+<h2>General R Workflow</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16" data-code-line-numbers="7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>object_name <span class="ot">&lt;-</span> value</span>
+<span id="cb16-2"><a href="#cb16-2"></a></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="co"># Example</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a>a <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb16-5"><a href="#cb16-5"></a>b <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a>c <span class="ot">&lt;-</span> a <span class="sc">+</span> b</span>
+<span id="cb16-7"><a href="#cb16-7"></a>c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 7</code></pre>
+</div>
+</div>
+<ul>
+<li>Return the results</li>
+</ul>
+</section>
+<section id="general-r-syntax" class="slide level2">
+<h2>General R Syntax</h2>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1"></a><span class="fu">function_name</span>(<span class="at">arg1 =</span> val1[<span class="fu">which</span>()], <span class="at">arg2 =</span> val2[<span class="fu">which</span>()], <span class="at">option1 =</span> val3, ...)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div>
+<ul>
+<li class="fragment"><strong>function_name</strong>: What action do you want to see performed?</li>
+<li class="fragment"><strong>args</strong>, files, objects: On what objects is the command to be performed</li>
+<li class="fragment"><strong>Qualifier(s) on observations</strong>: Which observations are to be taken into account (and how)? (“which”)</li>
+<li class="fragment"><strong>options</strong>: What special things should be done in the execution?</li>
+</ul>
+</div>
+</section>
+<section id="general-r-syntax-1" class="slide level2">
+<h2>General R Syntax</h2>
+<p>Produce a sequence between 0 and 10 with 20 values</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1"></a>y <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="at">length.out =</span> <span class="dv">20</span>)</span>
+<span id="cb19-2"><a href="#cb19-2"></a>y</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1]  0.0000000  0.5263158  1.0526316  1.5789474  2.1052632  2.6315789
+ [7]  3.1578947  3.6842105  4.2105263  4.7368421  5.2631579  5.7894737
+[13]  6.3157895  6.8421053  7.3684211  7.8947368  8.4210526  8.9473684
+[19]  9.4736842 10.0000000</code></pre>
+</div>
+</div>
+<p>Calculate the mean</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="fu">mean</span>(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 5</code></pre>
+</div>
+</div>
+<p>Calculate the mean of all values above 5</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1"></a><span class="fu">mean</span>(y[<span class="fu">which</span>(y <span class="sc">&gt;=</span> <span class="dv">5</span>)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 7.631579</code></pre>
+</div>
+</div>
+</section>
+<section id="command-is-your-friend" class="slide level2">
+<h2>“?[command]” is your friend</h2>
+
+<img data-src="figs/R2.png" class="r-stretch"><div class="sourceCode" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>?seq</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="footer footer-default">
 
 </div>
 </section></section>
