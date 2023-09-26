@@ -50,9 +50,9 @@ We wish to learn some characteristics of a population (e.g., the mean and standa
 :::
 
 
-## Example data {.scrollable}
+## Example data {.scrollable .smaller}
 
-The code below loads the WDI packages and searches for an indicator on CO2 per capita.
+The code below loads the WDI packages and searches for an indicator on CO2 per capita. It uses the statistics software R (more later).
 
 ```{r example_wdi_1}
 #| echo: true
@@ -60,7 +60,7 @@ The code below loads the WDI packages and searches for an indicator on CO2 per c
 # load package
 library(WDI)
 
-# Search GDP per capita
+# Search GDP per capita (log-transformed)
 WDIsearch("CO2.*capita")
 
 ```
@@ -97,12 +97,64 @@ library(ggplot2)
 pl <- ggplot(wd.df, aes(x = gdp_pc, y = co2_pc, size = population, color = region)) +
   geom_point(alpha = 0.5) + 
   theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) +
-  labs(y = "CO2 emissions per capita", x = "GDP per capita")
+  labs(y = "CO2 emissions per capita (log-transformed)", x = "GDP per capita (log-transformed)")
 
 pl
 ```
 
-__Descriptive__: What are the average CO2 emissions of all highly populated countries countries?
+__Descriptive__: What are the average CO2 emissions of all European countries?
+
+## Descriptive Inference
+
+What are the average CO2 emissions of all European countries?
+
+Mean by region
+
+```{r wdi_mean1, message=FALSE, warning=FALSE}
+#| echo: true
+#| code-fold: false
+
+mean_co2 <- mean(wd.df$co2_pc[which(wd.df$region == "Europe & Central Asia")], na.rm = TRUE)
+mean_co2
+```
+
+
+## Descriptive Inference {.smaller}
+
+What are the average CO2 emissions of all European countries?
+
+```{r wdi_mean2, message=FALSE, warning=FALSE}
+#| echo: true
+#| code-fold: true
+
+# Create group means
+means.df <- aggregate(wd.df[, c("gdp_pc", "co2_pc")],
+                      by = list(region = wd.df$region),
+                      FUN = function(x) mean(x, na.rm = TRUE))
+
+# Create group standard deviations
+sd.df <- aggregate(wd.df[, c("gdp_pc", "co2_pc")],
+                      by = list(region = wd.df$region),
+                      FUN = function(x) sd(x, na.rm = TRUE))
+
+names(sd.df)[2:3] <- paste0("sd_", names(means.df)[2:3])
+
+# merge
+summary.df <- merge(means.df, sd.df, by = "region")
+
+# Plot
+pl_mean <- ggplot(wd.df, aes(x = gdp_pc, y = co2_pc, color = region)) +
+  geom_point(data = wd.df, mapping = aes(x = gdp_pc, y = co2_pc, size = population, color = region),
+             alpha = 0.5) + 
+  geom_point(data = summary.df, 
+                  mapping = aes(x = gdp_pc, y = co2_pc,  fill = region),
+                  size = 4, shape = 25, color = "yellow") +
+  theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) +
+  labs(y = "CO2 emissions per capita (log-transformed)", x = "GDP per capita (log-transformed)")
+
+pl_mean
+```
+
 
 
 ## Causal Inference
@@ -115,7 +167,7 @@ __Descriptive__: What are the average CO2 emissions of all highly populated coun
 pl2 <- ggplot(wd.df, aes(x = gdp_pc, y = co2_pc, size = population, color = region)) +
   geom_smooth(aes(group = 1), show.legend = "none") + geom_point(alpha = 0.5) + 
   theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) +
-  labs(y = "CO2 emissions per capita", x = "GDP per capita")
+  labs(y = "CO2 emissions per capita (log-transformed)", x = "GDP per capita (log-transformed)")
 
 pl2
 ```
@@ -198,7 +250,7 @@ The distribution of the (relative) frequencies of their values
 #| code-summary: "expand for full code"
 
 p <- ggplot(wd.df, aes(x = gdp_pc)) + geom_density() + 
-  labs(y = "Density", x = "GDP per capita") + theme_bw()
+  labs(y = "Density", x = "GDP per capita (log-transformed)") + theme_bw()
 p
 ```
 
@@ -292,6 +344,28 @@ $$
 
 * It is the square root of the variance; it “reverts” the square-taking in the variance calculation, to bring the statistic back to the original scale of the variable
 
+## Measures of Dispersion  {.smaller}
+
+```{r distributions4, message=FALSE, warning=FALSE}
+#| echo: true
+#| code-fold: true
+#| code-summary: "expand for full code"
+
+# Seed for random number
+set.seed(12345)
+
+# Normal distribution
+d1 <- data.frame(x = rnorm(10000, 0, 0.5), dist = "sd = 0.5")
+d2 <- data.frame(x = rnorm(10000, 0, 1), dist = "sd = 1")
+d3 <- data.frame(x = rnorm(10000, 0, 3), dist = "sd = 3")
+
+p <- ggplot(rbind(d1, d2, d3), aes(x = x)) + 
+  geom_density(aes(color = dist, linetype = dist), size = 1.5) + 
+  labs(y = "Density", x = "Variable x") + theme_bw() +
+  ggtitle("Normal distribution") + geom_vline(xintercept = 0)
+p
+```
+
 
 ## Notation {.smaller}
 
@@ -375,16 +449,16 @@ Dividing the covariance by the product of the standard deviations normalizes the
 :::
 
 
-## An Example
+## Example I
 
 ```{r}
 #| echo: true
 #| code-fold: true
-pl
+pl + ggtitle(paste("Pearsons correlation = ", " ?"))
 ```
 
 
-## An Example I
+## Example I
 
 ```{r}
 #| echo: true
@@ -409,14 +483,14 @@ pl3 <- ggplot(wd.df, aes(x = gdp_pc, y = co2_pc, size = population, color = regi
   geom_smooth(aes(group = 1), method = 'lm', show.legend = "none") + 
   geom_point(alpha = 0.5) + 
   theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) +
-  labs(y = "CO2 emissions per capita", x = "GDP per capita") +
+  labs(y = "CO2 emissions per capita (log-transformed)", x = "GDP per capita (log-transformed)") +
   ggtitle(paste("Pearsons correlation = ", round(cor, 3)))
 
 pl3
 ```
 
 
-## An Example II
+## Example II
 
 ```{r}
 #| echo: true
@@ -438,17 +512,320 @@ cor <- cor(wd.df$ln_population, wd.df$ln_co2_pc, use = "complete.obs")
 
 # Plot with linear line
 pl3 <- ggplot(wd.df, aes(x = population, y = co2_pc, size = population, color = region)) +
-  geom_smooth(aes(group = 1), method = 'lm', show.legend = "none") + 
+  # geom_smooth(aes(group = 1), method = 'lm', show.legend = "none") + 
   geom_point(alpha = 0.5) + 
   theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) +
-  labs(y = "CO2 emissions per capita", x = "Population") +
+  labs(y = "CO2 emissions per capita (log-transformed)", x = "Population") +
+  ggtitle(paste("Pearsons correlation = ", " ?"))
+
+pl3
+```
+
+## Example II
+
+```{r}
+#| echo: true
+#| code-fold: true
+
+# Plot with linear line
+pl3 <- pl3 +
+  geom_smooth(aes(group = 1), method = 'lm', show.legend = "none") + 
   ggtitle(paste("Pearsons correlation = ", round(cor, 3)))
 
 pl3
 ```
 
 
+## The world is more complex
+
+![](figs/R3.png)
+
+
+## The Linear Model {.smaller}
+
+$$
+y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \ldots +  \beta_k x_{ki} +\epsilon_i
+$$
+
+::: {.incremental}
+* $y_i$: $i$ observation $(i = 1, \ldots , n)$ of dependent variable $y$ ;
+* $X_{ji}$: $i$ observation of $j$ explanatory variable $x$ $(j = 1, \ldots, k)$.
+* $\beta_j$: parameters to be estimated.
+* $\epsilon_i$: error term. It contains all factors affecting $y_i$, but not contained in $x_{ji}$.
+:::
+
+## The OLS estimator {.smaller}
+
+The Omitted Least Squares (OLS) estimator is one way to estimate the parameter $\beta$ in our population model
+
+To distinguish between estimates and actual parameters to be estimated, the following notation is generally used:
+
+* The estimate for $\beta$ is indicated as $\hat\beta$
+* The estimated error term, also called residual is indicated as $\hat\epsilon$
+* The predicted value of the dependent variable $y$ is indicated as $\hat y$
+
+## The OLS estimator {.smaller}
+
+The OLS method chooses the estimates of $\beta$ to minimise the sum of squared residuals (SSR)
+
+$$
+\begin{align} 
+\min_{\beta_0,\dots x\beta_k} [\sum^N_{i=1}(Y_i-\hat Y_i)^2] \quad \text{or}  \quad
+\min_{\beta_0,\dots x\beta_k} [ \hat{\epsilon}^\intercal \hat{\epsilon} ]
+\end{align}
+$$
+
+
+. . .
+
+The solution is the OLS estimator:
+$$
+\begin{align} 
+\hat{\beta}_{OLS} = \frac{\sum^N_{i = 1}(X_i - \bar X)(Y_i - \bar Y)}{\sum^N_{i = 1}(X_i - \bar X)^2}
+\end{align}
+$$
+
+or in matrix notation:
+$$
+\begin{align} 
+\hat{\mathbf \beta}_{OLS} = (\mathbf X^\intercal \mathbf X)^{-1} \mathbf X^\intercal \mathbf Y
+\end{align}
+$$
+
+## An example: wage {.smaller}
+
+$$
+wage_i = \beta_0 + \beta_1 education_{i} + \beta_2 union_{i} +\epsilon_i
+$$
+
+::: {.incremental}
+* $y_i$: log-transformed wage of individual $i$;
+* $X_{1i}$: education years of individual $i$.
+* $X_{2i}$: whether or not individual $i$ is union member.
+* $\epsilon_i$: error term. It contains all factors affecting the wage, but not contained in education years and union membership (such as age, gender, subject, quantitative methods skills, and lots more).
+:::
+
+## An example: wage {.smaller}
+
+```{r wages1}
+#| echo: true
+#| code-fold: true
+
+# Get example data 
+library(plm)
+data("Wages")
+
+# Reduce data frame to cross-section
+Wages$year <- rep(c(1976:1982), 595)
+wages_cs.df <- Wages[which(Wages$year == 1976), ]
+
+# Reduce to 50 individual random sample
+set.seed(653210)
+wages_cs.df <- wages_cs.df[sample(1:595, 50), ]
+
+# Plot with linear line
+pl3 <- ggplot(wages_cs.df, aes(x = ed, y = lwage, color = union, shape = union)) +
+  geom_point(alpha = 1) + 
+  theme_minimal() + 
+  labs(y = "log-transformed wage", x = "Education years") +
+  ggtitle("50 individuals from the Panel Study of Income Dynamics")
+
+pl3
+```
+
+## An example: wage {.smaller}
+
+The OLS estimator
+
+```{r wages2}
+#| echo: true
+#| code-fold: false
+
+mod1.lm <- lm(lwage ~ ed + union, data = wages_cs.df)
+summary(mod1.lm)
+```
+
+<!-- ## An example: wage {.smaller} -->
+
+
+<!-- ```{r wages3} -->
+<!-- #| echo: true -->
+<!-- #| code-fold: true -->
+<!-- # Plot with linear line -->
+<!-- pl3 <- ggplot(wages_cs.df, aes(x = ed, y = lwage, color = union, shape = union)) + -->
+<!--   geom_point(alpha = 1) +  -->
+<!--   theme_minimal() +  -->
+<!--   labs(y = "log-transformed wage", x = "Education years") + -->
+<!--   ggtitle("50 individuals from the Panel Study of Income Dynamics") -->
+
+<!-- pl3 -->
+<!-- ``` -->
+
+## An example: wage {.smaller}
+
+
+```{r wages4}
+#| echo: true
+#| code-fold: true
+
+library(gganimate)
+
+# Residualise y
+tmp.mod1 <- lm(lwage ~ union, data = wages_cs.df)
+wages_cs.df$lwage_resid <- resid(tmp.mod1)
+
+# Residualise x
+tmp.mod1 <- lm(ed ~ union, data = wages_cs.df)
+wages_cs.df$ed_resid <- resid(tmp.mod1)
+
+# Create data of states to animate
+df <- rbind(data.frame(lwage = wages_cs.df$lwage,
+                       ed = wages_cs.df$ed,
+                       union = wages_cs.df$union,
+                       resid = 0),
+            data.frame(lwage = wages_cs.df$lwage_resid,
+                       ed = wages_cs.df$ed,
+                       union = wages_cs.df$union,
+                       resid = 1),
+            data.frame(lwage = wages_cs.df$lwage_resid, # just to duplicate
+                       ed = wages_cs.df$ed,
+                       union = wages_cs.df$union,
+                       resid = 2),
+            data.frame(lwage = wages_cs.df$lwage_resid,
+                       ed = wages_cs.df$ed_resid,
+                       union = wages_cs.df$union,
+                       resid = 3),
+            data.frame(lwage = wages_cs.df$lwage_resid, # just to duplicate
+                       ed = wages_cs.df$ed_resid,
+                       union = wages_cs.df$union,
+                       resid = 4),
+            data.frame(lwage = wages_cs.df$lwage_resid, # just to duplicate
+                       ed = wages_cs.df$ed_resid,
+                       union = wages_cs.df$union,
+                       resid = 5))
+
+
+# Plot with linear line
+pl4 <- ggplot(df, aes(x = ed, y = lwage, color = union, shape = union)) +
+  geom_point(alpha = 1) + 
+  theme_minimal() + 
+  labs(y = "log-transformed wage", x = "Education years") +
+  ggtitle("50 individuals from the Panel Study of Income Dynamics")+
+  transition_states(resid, wrap = FALSE) + 
+  shadow_mark(alpha = 0.7, size = 1) 
+  # + view_zoom(nsteps = 3, include = TRUE, 
+  #           look_ahead = 4, wrap = FALSE)
+
+pl4
+```
+
+
+
+## An example: wage {.smaller}
+
+```{r wages5_0}
+#| echo: true
+#| code-fold: true
+
+# Plot with linear line
+pl5_0 <- ggplot(wages_cs.df, aes(x = ed_resid, y = lwage_resid)) +
+  geom_point(alpha = 1) + 
+  theme_minimal() + 
+  labs(y = "residualized log-transformed wage", x = "residualized Education years") +
+  ggtitle("50 individuals from the Panel Study of Income Dynamics")
+
+pl5_0
+```
+
+
+## An example: wage {.smaller}
+
+```{r wages5}
+#| echo: true
+#| code-fold: true
+
+ # fit the model
+fit <- lm(lwage_resid ~ ed_resid, data = wages_cs.df)
+
+# Save the predicted values
+wages_cs.df$predicted <- predict(fit)
+
+# Save the residual values
+wages_cs.df$residuals <- residuals(fit)
+
+library(ggpubr)
+
+# Plot with linear line
+pl5 <- ggplot(wages_cs.df, aes(x = ed_resid, y = lwage_resid)) +
+  geom_point(alpha = 1) + 
+  geom_smooth(aes(group = 1), method = 'lm', show.legend = "none", se = FALSE) +
+  geom_segment(aes(xend = ed_resid, yend = predicted), alpha = .2, color = "purple") +
+  geom_point(aes(x = ed_resid, y = predicted), alpha = 0.5, shape = 1, color = "red") + 
+  theme_minimal() + 
+  labs(y = "residualized log-transformed wage", x = "residualized Education years") +
+  ggtitle("50 individuals from the Panel Study of Income Dynamics") +
+  stat_regline_equation(aes(label = ..eq.label..))
+
+pl5
+```
+
+
+
+
+<!-- ## An example: wage {.smaller} -->
+
+<!-- ```{r wages5} -->
+<!-- #| echo: true -->
+<!-- #| code-fold: true -->
+
+<!-- # Residualise x -->
+<!-- tmp.mod1 <- lm(ed ~ union, data = wages_cs.df) -->
+<!-- wages_cs.df$ed_resid <- resid(tmp.mod1) -->
+
+<!-- # Plot with linear line -->
+<!-- pl5 <- ggplot(wages_cs.df, aes(x = ed_resid, y = lwage_resid)) + -->
+<!--   geom_point(alpha = 0.5) +  -->
+<!--   theme_minimal() +  -->
+<!--   labs(y = "log-transformed wage", x = "residualized Education years") + -->
+<!--   ggtitle("50 individuals from the Panel Study of Income Dynamics") -->
+
+<!-- pl5 -->
+<!-- ``` -->
+
+<!-- ## The OLS estimator {.smaller} -->
+
+<!-- ```{r} -->
+<!--  # fit the model -->
+<!-- fit <- lm(co2_pc ~ gdp_pc, data = wd.df) -->
+
+<!-- # Save the predicted values -->
+<!-- wd.df$predicted <- NA -->
+<!-- wd.df$predicted[-fit$na.action] <- predict(fit)   -->
+
+<!-- # Save the residual values -->
+<!-- wd.df$residuals <- NA -->
+<!-- wd.df$residuals[-fit$na.action] <- residuals(fit)  -->
+
+<!-- # Plot -->
+<!-- # Plot with linear line -->
+<!-- pl4 <- ggplot(wd.df, aes(x = gdp_pc, y = co2_pc)) + -->
+<!--   geom_smooth(aes(group = 1), method = 'lm', show.legend = "none", se = FALSE) +  -->
+<!--   geom_segment(aes(xend = gdp_pc, yend = predicted), alpha = .2) + -->
+<!--   geom_point(aes(color = abs(residuals), size = abs(residuals)), alpha = 0.5) +  -->
+<!--   scale_color_continuous(low = "green", high = "red") + -->
+<!--   theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) + -->
+<!--   labs(y = "CO2 emissions per capita (log-transformed)", x = "GDP per capita (log-transformed)") + -->
+<!--   ggtitle(paste("Pearsons correlation = ", round(cor, 3))) -->
+
+<!-- pl4 -->
+<!-- ``` -->
+
+
 # Statistical Software
+
+## UCL Download centre
+
+[https://www.ucl.ac.uk/isd/services/software-hardware/software-for-students](https://www.ucl.ac.uk/isd/services/software-hardware/software-for-students)
 
 ## Statistical software
 
@@ -710,3 +1087,11 @@ mean(y[which(y >= 5)])
 ```{.r}
 ?seq
 ```
+
+## There are a lot of helpful resources
+
+* [Stata Cheatsheet](https://www.stata.com/bookstore/statacheatsheets.pdf)
+
+* [Base R Cheatsheet](https://iqss.github.io/dss-workshops/R/Rintro/base-r-cheat-sheet.pdf)
+
+* [Tidy R Cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
