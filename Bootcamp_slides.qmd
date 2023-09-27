@@ -46,7 +46,7 @@ We wish to learn some characteristics of a population (e.g., the mean and standa
 
 ::: {.incremental}
 1) __Descriptive inference__: What is going on, or what exists? 
-2) __Causal inference__: Why is something going on, why does it exist? 
+2) __Causal inference__: Why is something going on, why does it exist? Does X cause Y?
 :::
 
 
@@ -114,10 +114,18 @@ Mean by region
 #| echo: true
 #| code-fold: false
 
-mean_co2 <- mean(wd.df$co2_pc[which(wd.df$region == "Europe & Central Asia")], na.rm = TRUE)
+mean_co2 <- mean(wd.df$co2_pc[which(wd.df$region == "Europe & Central Asia")], 
+                 na.rm = TRUE)
 mean_co2
 ```
 
+. . .
+
+This is the average across European countries.
+
+. . .
+
+Why is it not the average across all Europeans?
 
 ## Descriptive Inference {.smaller}
 
@@ -127,26 +135,18 @@ What are the average CO2 emissions of all European countries?
 #| echo: true
 #| code-fold: true
 
-# Create group means
-means.df <- aggregate(wd.df[, c("gdp_pc", "co2_pc")],
-                      by = list(region = wd.df$region),
+# Create group means (only for complete observations)
+tmp.df <- wd.df[, c("region", "gdp_pc", "co2_pc")]
+tmp.df <- tmp.df[complete.cases(tmp.df),]
+means.df <- aggregate(tmp.df[, c("gdp_pc", "co2_pc")],
+                      by = list(region = tmp.df$region),
                       FUN = function(x) mean(x, na.rm = TRUE))
-
-# Create group standard deviations
-sd.df <- aggregate(wd.df[, c("gdp_pc", "co2_pc")],
-                      by = list(region = wd.df$region),
-                      FUN = function(x) sd(x, na.rm = TRUE))
-
-names(sd.df)[2:3] <- paste0("sd_", names(means.df)[2:3])
-
-# merge
-summary.df <- merge(means.df, sd.df, by = "region")
 
 # Plot
 pl_mean <- ggplot(wd.df, aes(x = gdp_pc, y = co2_pc, color = region)) +
   geom_point(data = wd.df, mapping = aes(x = gdp_pc, y = co2_pc, size = population, color = region),
              alpha = 0.5) + 
-  geom_point(data = summary.df, 
+  geom_point(data = means.df, 
                   mapping = aes(x = gdp_pc, y = co2_pc,  fill = region),
                   size = 4, shape = 25, color = "yellow") +
   theme_minimal() + scale_y_log10() +  scale_x_log10(labels = scales::dollar_format()) +
@@ -234,7 +234,7 @@ There are many different ways to do this
 :::
 
 
-## Distribution
+## Distribution {.smaller}
 
 Variables can be characterized by their __frequency distribution__: 
 
@@ -242,25 +242,24 @@ The distribution of the (relative) frequencies of their values
 
   - E.g., we can graph the world income distribution:
 
-## {auto-animate=true}
-
 ```{r distributions1, message=FALSE, warning=FALSE}
 #| echo: true
 #| code-fold: true
 #| code-summary: "expand for full code"
 
 p <- ggplot(wd.df, aes(x = gdp_pc)) + geom_density() + 
-  labs(y = "Density", x = "GDP per capita (log-transformed)") + theme_bw()
+  labs(y = "Density", x = "GDP per capita") + theme_bw()
 p
 ```
 
 ## Distributions: Examples
 
+::: {.incremental}
 * Normal distribution
-
 * Chi-squared distribution
+:::
 
-## {auto-animate=true}
+## Distributions: Example I
 
 ```{r distributions2, message=FALSE, warning=FALSE}
 #| echo: true
@@ -282,7 +281,7 @@ p <- ggplot(rbind(d1, d2, d3), aes(x = x)) +
 p
 ```
 
-## {auto-animate=true}
+## Distributions: Example II
 
 ```{r distributions3, message=FALSE, warning=FALSE}
 #| echo: true
@@ -301,7 +300,7 @@ p <- ggplot(rbind(d2, d3, d4), aes(x = x)) +
 p
 ```
 
-## {auto-animate=true}
+## Distributions: Example III
 
 #### Distributions can take on many different shapes
 
@@ -623,9 +622,16 @@ wages_cs.df <- Wages[which(Wages$year == 1976), ]
 set.seed(653210)
 wages_cs.df <- wages_cs.df[sample(1:595, 50), ]
 
+# Means
+means.df <- aggregate(wages_cs.df[, c("ed", "lwage")],
+                      by = list(union = wages_cs.df$union),
+                      FUN = function(x) mean(x, na.rm = TRUE))
+
 # Plot with linear line
 pl3 <- ggplot(wages_cs.df, aes(x = ed, y = lwage, color = union, shape = union)) +
   geom_point(alpha = 1) + 
+  geom_point(data = means.df, mapping = aes(color = union), 
+             alpha = 0.5, stroke  = 2, size = 2, shape = c(1,2), show.legend = FALSE) +
   theme_minimal() + 
   labs(y = "log-transformed wage", x = "Education years") +
   ggtitle("50 individuals from the Panel Study of Income Dynamics")
@@ -704,10 +710,17 @@ df <- rbind(data.frame(lwage = wages_cs.df$lwage,
                        union = wages_cs.df$union,
                        resid = 5))
 
+means.df <- aggregate(df[, c("lwage", "ed")],
+                   by = list(union = df$union,
+                             resid = df$resid),
+                  FUN = function(x) mean(x, na.rm = TRUE))
+
 
 # Plot with linear line
 pl4 <- ggplot(df, aes(x = ed, y = lwage, color = union, shape = union)) +
   geom_point(alpha = 1) + 
+  geom_point(data = means.df, 
+             alpha = 0.5, stroke  = 2, size = 2, show.legend = FALSE) +
   theme_minimal() + 
   labs(y = "log-transformed wage", x = "Education years") +
   ggtitle("50 individuals from the Panel Study of Income Dynamics")+
@@ -727,9 +740,16 @@ pl4
 #| echo: true
 #| code-fold: true
 
+# Means
+means.df <- aggregate(wages_cs.df[, c("ed_resid", "lwage_resid")],
+                      by = list(union = wages_cs.df$union),
+                      FUN = function(x) mean(x, na.rm = TRUE))
+
 # Plot with linear line
 pl5_0 <- ggplot(wages_cs.df, aes(x = ed_resid, y = lwage_resid)) +
-  geom_point(alpha = 1) + 
+  geom_point(aes(color = union, shape = union), alpha = 1) + 
+  geom_point(data = means.df, mapping = aes(color = union), 
+             alpha = 0.5, stroke  = 2, size = 2, shape = c(1,2), show.legend = FALSE) +
   theme_minimal() + 
   labs(y = "residualized log-transformed wage", x = "residualized Education years") +
   ggtitle("50 individuals from the Panel Study of Income Dynamics")
@@ -757,7 +777,9 @@ library(ggpubr)
 
 # Plot with linear line
 pl5 <- ggplot(wages_cs.df, aes(x = ed_resid, y = lwage_resid)) +
-  geom_point(alpha = 1) + 
+  geom_point(aes(color = union, shape = union), alpha = 1) + 
+  geom_point(data = means.df, mapping = aes(color = union), 
+             alpha = 0.5, stroke  = 2, size = 2, shape = c(1,2), show.legend = FALSE) +
   geom_smooth(aes(group = 1), method = 'lm', show.legend = "none", se = FALSE) +
   geom_segment(aes(xend = ed_resid, yend = predicted), alpha = .2, color = "purple") +
   geom_point(aes(x = ed_resid, y = predicted), alpha = 0.5, shape = 1, color = "red") + 
@@ -911,14 +933,14 @@ After entering a command, you select it, and then click the “execute” button
 1. Use annotations to facilitate replicability (incl. for future self!):
 	* Use * for single-line comments and /* */ for multiple lines 
 
-## {auto-animate=true .smaller}
+## Do File Dos and Don’ts {.smaller}
 	
 ![](figs/Stata9.png)	
 
 2. Break down code into clearly labelled sections / subsections
 3. Use tab indentations to making things easy to read
 
-## {auto-animate=true .smaller}
+## Do File Dos and Don’ts {.smaller}
 
 ![](figs/Stata10.png)	
 
@@ -1088,6 +1110,31 @@ mean(y[which(y >= 5)])
 ?seq
 ```
 
+
+## Define your working directory {.smaller}
+
+This is a path: "C:/work/Lehre/Bootcamp_slides/" (look the slash direction)
+
+![](figs/file.png)
+
+
+## Define your working directory
+
+#### Stata
+
+```{.stata}
+cd "C:/work/Lehre/Bootcamp_slides/"
+```
+
+
+#### R
+
+```{.r}
+setwd('C:/work/Lehre/Bootcamp_slides/')
+```
+
+
+
 ## There are a lot of helpful resources
 
 * [Stata Cheatsheet](https://www.stata.com/bookstore/statacheatsheets.pdf)
@@ -1095,3 +1142,5 @@ mean(y[which(y >= 5)])
 * [Base R Cheatsheet](https://iqss.github.io/dss-workshops/R/Rintro/base-r-cheat-sheet.pdf)
 
 * [Tidy R Cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
+
+

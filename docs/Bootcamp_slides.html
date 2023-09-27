@@ -443,7 +443,7 @@ Rocio Mendez Pineda &amp; Tobias Rüttenauer
 <div>
 <ol type="1">
 <li class="fragment"><strong>Descriptive inference</strong>: What is going on, or what exists?</li>
-<li class="fragment"><strong>Causal inference</strong>: Why is something going on, why does it exist?</li>
+<li class="fragment"><strong>Causal inference</strong>: Why is something going on, why does it exist? Does X cause Y?</li>
 </ol>
 </div>
 </div>
@@ -507,11 +507,18 @@ Rocio Mendez Pineda &amp; Tobias Rüttenauer
 <p>What are the average CO2 emissions of all European countries?</p>
 <p>Mean by region</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>mean_co2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(wd.df<span class="sc">$</span>co2_pc[<span class="fu">which</span>(wd.df<span class="sc">$</span>region <span class="sc">==</span> <span class="st">"Europe &amp; Central Asia"</span>)], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb5-2"><a href="#cb5-2"></a>mean_co2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>mean_co2 <span class="ot">&lt;-</span> <span class="fu">mean</span>(wd.df<span class="sc">$</span>co2_pc[<span class="fu">which</span>(wd.df<span class="sc">$</span>region <span class="sc">==</span> <span class="st">"Europe &amp; Central Asia"</span>)], </span>
+<span id="cb5-2"><a href="#cb5-2"></a>                 <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-3"><a href="#cb5-3"></a>mean_co2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 5.608387</code></pre>
 </div>
+</div>
+<div class="fragment">
+<p>This is the average across European countries.</p>
+</div>
+<div class="fragment">
+<p>Why is it not the average across all Europeans?</p>
 </div>
 </section>
 <section id="descriptive-inference-2" class="slide level2 smaller">
@@ -520,32 +527,24 @@ Rocio Mendez Pineda &amp; Tobias Rüttenauer
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># Create group means</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a>means.df <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(wd.df[, <span class="fu">c</span>(<span class="st">"gdp_pc"</span>, <span class="st">"co2_pc"</span>)],</span>
-<span id="cb7-3"><a href="#cb7-3"></a>                      <span class="at">by =</span> <span class="fu">list</span>(<span class="at">region =</span> wd.df<span class="sc">$</span>region),</span>
-<span id="cb7-4"><a href="#cb7-4"></a>                      <span class="at">FUN =</span> <span class="cf">function</span>(x) <span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb7-5"><a href="#cb7-5"></a></span>
-<span id="cb7-6"><a href="#cb7-6"></a><span class="co"># Create group standard deviations</span></span>
-<span id="cb7-7"><a href="#cb7-7"></a>sd.df <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(wd.df[, <span class="fu">c</span>(<span class="st">"gdp_pc"</span>, <span class="st">"co2_pc"</span>)],</span>
-<span id="cb7-8"><a href="#cb7-8"></a>                      <span class="at">by =</span> <span class="fu">list</span>(<span class="at">region =</span> wd.df<span class="sc">$</span>region),</span>
-<span id="cb7-9"><a href="#cb7-9"></a>                      <span class="at">FUN =</span> <span class="cf">function</span>(x) <span class="fu">sd</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb7-10"><a href="#cb7-10"></a></span>
-<span id="cb7-11"><a href="#cb7-11"></a><span class="fu">names</span>(sd.df)[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>] <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"sd_"</span>, <span class="fu">names</span>(means.df)[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>])</span>
-<span id="cb7-12"><a href="#cb7-12"></a></span>
-<span id="cb7-13"><a href="#cb7-13"></a><span class="co"># merge</span></span>
-<span id="cb7-14"><a href="#cb7-14"></a>summary.df <span class="ot">&lt;-</span> <span class="fu">merge</span>(means.df, sd.df, <span class="at">by =</span> <span class="st">"region"</span>)</span>
-<span id="cb7-15"><a href="#cb7-15"></a></span>
-<span id="cb7-16"><a href="#cb7-16"></a><span class="co"># Plot</span></span>
-<span id="cb7-17"><a href="#cb7-17"></a>pl_mean <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(wd.df, <span class="fu">aes</span>(<span class="at">x =</span> gdp_pc, <span class="at">y =</span> co2_pc, <span class="at">color =</span> region)) <span class="sc">+</span></span>
-<span id="cb7-18"><a href="#cb7-18"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> wd.df, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> gdp_pc, <span class="at">y =</span> co2_pc, <span class="at">size =</span> population, <span class="at">color =</span> region),</span>
-<span id="cb7-19"><a href="#cb7-19"></a>             <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
-<span id="cb7-20"><a href="#cb7-20"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> summary.df, </span>
-<span id="cb7-21"><a href="#cb7-21"></a>                  <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> gdp_pc, <span class="at">y =</span> co2_pc,  <span class="at">fill =</span> region),</span>
-<span id="cb7-22"><a href="#cb7-22"></a>                  <span class="at">size =</span> <span class="dv">4</span>, <span class="at">shape =</span> <span class="dv">25</span>, <span class="at">color =</span> <span class="st">"yellow"</span>) <span class="sc">+</span></span>
-<span id="cb7-23"><a href="#cb7-23"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> <span class="fu">scale_y_log10</span>() <span class="sc">+</span>  <span class="fu">scale_x_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">dollar_format</span>()) <span class="sc">+</span></span>
-<span id="cb7-24"><a href="#cb7-24"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"CO2 emissions per capita (log-transformed)"</span>, <span class="at">x =</span> <span class="st">"GDP per capita (log-transformed)"</span>)</span>
-<span id="cb7-25"><a href="#cb7-25"></a></span>
-<span id="cb7-26"><a href="#cb7-26"></a>pl_mean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># Create group means (only for complete observations)</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>tmp.df <span class="ot">&lt;-</span> wd.df[, <span class="fu">c</span>(<span class="st">"region"</span>, <span class="st">"gdp_pc"</span>, <span class="st">"co2_pc"</span>)]</span>
+<span id="cb7-3"><a href="#cb7-3"></a>tmp.df <span class="ot">&lt;-</span> tmp.df[<span class="fu">complete.cases</span>(tmp.df),]</span>
+<span id="cb7-4"><a href="#cb7-4"></a>means.df <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(tmp.df[, <span class="fu">c</span>(<span class="st">"gdp_pc"</span>, <span class="st">"co2_pc"</span>)],</span>
+<span id="cb7-5"><a href="#cb7-5"></a>                      <span class="at">by =</span> <span class="fu">list</span>(<span class="at">region =</span> tmp.df<span class="sc">$</span>region),</span>
+<span id="cb7-6"><a href="#cb7-6"></a>                      <span class="at">FUN =</span> <span class="cf">function</span>(x) <span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb7-7"><a href="#cb7-7"></a></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="co"># Plot</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a>pl_mean <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(wd.df, <span class="fu">aes</span>(<span class="at">x =</span> gdp_pc, <span class="at">y =</span> co2_pc, <span class="at">color =</span> region)) <span class="sc">+</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> wd.df, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> gdp_pc, <span class="at">y =</span> co2_pc, <span class="at">size =</span> population, <span class="at">color =</span> region),</span>
+<span id="cb7-11"><a href="#cb7-11"></a>             <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb7-12"><a href="#cb7-12"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> means.df, </span>
+<span id="cb7-13"><a href="#cb7-13"></a>                  <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> gdp_pc, <span class="at">y =</span> co2_pc,  <span class="at">fill =</span> region),</span>
+<span id="cb7-14"><a href="#cb7-14"></a>                  <span class="at">size =</span> <span class="dv">4</span>, <span class="at">shape =</span> <span class="dv">25</span>, <span class="at">color =</span> <span class="st">"yellow"</span>) <span class="sc">+</span></span>
+<span id="cb7-15"><a href="#cb7-15"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> <span class="fu">scale_y_log10</span>() <span class="sc">+</span>  <span class="fu">scale_x_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">dollar_format</span>()) <span class="sc">+</span></span>
+<span id="cb7-16"><a href="#cb7-16"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"CO2 emissions per capita (log-transformed)"</span>, <span class="at">x =</span> <span class="st">"GDP per capita (log-transformed)"</span>)</span>
+<span id="cb7-17"><a href="#cb7-17"></a></span>
+<span id="cb7-18"><a href="#cb7-18"></a>pl_mean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -629,76 +628,75 @@ Rocio Mendez Pineda &amp; Tobias Rüttenauer
 </ul>
 </div>
 </section>
-<section id="distribution" class="slide level2">
+<section id="distribution" class="slide level2 smaller">
 <h2>Distribution</h2>
 <p>Variables can be characterized by their <strong>frequency distribution</strong>:</p>
 <p>The distribution of the (relative) frequencies of their values</p>
 <ul>
 <li>E.g., we can graph the world income distribution:</li>
 </ul>
-</section>
-<section id="section" class="slide level2" data-auto-animate="true">
-<h2 data-id="quarto-animate-title"></h2>
 <div class="cell">
 <details>
 <summary>expand for full code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb9-1" class="hljs-ln-code"><a href="#cb9-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(wd.df, <span class="fu">aes</span>(<span class="at">x =</span> gdp_pc)) <span class="sc">+</span> <span class="fu">geom_density</span>() <span class="sc">+</span> </span>
-<span id="cb9-2" class="hljs-ln-code"><a href="#cb9-2"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Density"</span>, <span class="at">x =</span> <span class="st">"GDP per capita (log-transformed)"</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span>
-<span id="cb9-3" class="hljs-ln-code"><a href="#cb9-3"></a>p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(wd.df, <span class="fu">aes</span>(<span class="at">x =</span> gdp_pc)) <span class="sc">+</span> <span class="fu">geom_density</span>() <span class="sc">+</span> </span>
+<span id="cb9-2"><a href="#cb9-2"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Density"</span>, <span class="at">x =</span> <span class="st">"GDP per capita"</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>()</span>
+<span id="cb9-3"><a href="#cb9-3"></a>p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
 <img data-src="Bootcamp_slides_files/figure-revealjs/distributions1-1.png" width="960" class="r-stretch"></section>
 <section id="distributions-examples" class="slide level2">
 <h2>Distributions: Examples</h2>
+<div>
 <ul>
-<li><p>Normal distribution</p></li>
-<li><p>Chi-squared distribution</p></li>
+<li class="fragment">Normal distribution</li>
+<li class="fragment">Chi-squared distribution</li>
 </ul>
+</div>
 </section>
-<section id="section-1" class="slide level2" data-auto-animate="true">
-<h2 data-id="quarto-animate-title"></h2>
+<section id="distributions-example-i" class="slide level2">
+<h2>Distributions: Example I</h2>
 <div class="cell">
 <details>
 <summary>expand for full code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb10-1" class="hljs-ln-code"><a href="#cb10-1"></a><span class="co"># Seed for random number</span></span>
-<span id="cb10-2" class="hljs-ln-code"><a href="#cb10-2"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb10-3" class="hljs-ln-code"><a href="#cb10-3"></a></span>
-<span id="cb10-4" class="hljs-ln-code"><a href="#cb10-4"></a><span class="co"># Normal distribution</span></span>
-<span id="cb10-5" class="hljs-ln-code"><a href="#cb10-5"></a>d1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rnorm</span>(<span class="dv">10000</span>, <span class="dv">0</span>, <span class="dv">1</span>), <span class="at">dist =</span> <span class="st">"mean = 0, sd = 1"</span>)</span>
-<span id="cb10-6" class="hljs-ln-code"><a href="#cb10-6"></a>d2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rnorm</span>(<span class="dv">10000</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">dist =</span> <span class="st">"mean = 1, sd = 1"</span>)</span>
-<span id="cb10-7" class="hljs-ln-code"><a href="#cb10-7"></a>d3 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rnorm</span>(<span class="dv">10000</span>, <span class="dv">0</span>, <span class="dv">2</span>), <span class="at">dist =</span> <span class="st">"mean = 0, sd = 2"</span>)</span>
-<span id="cb10-8" class="hljs-ln-code"><a href="#cb10-8"></a></span>
-<span id="cb10-9" class="hljs-ln-code"><a href="#cb10-9"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">rbind</span>(d1, d2, d3), <span class="fu">aes</span>(<span class="at">x =</span> x)) <span class="sc">+</span> </span>
-<span id="cb10-10" class="hljs-ln-code"><a href="#cb10-10"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">color =</span> dist, <span class="at">linetype =</span> dist), <span class="at">size =</span> <span class="fl">1.5</span>) <span class="sc">+</span> </span>
-<span id="cb10-11" class="hljs-ln-code"><a href="#cb10-11"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Density"</span>, <span class="at">x =</span> <span class="st">"Variable x"</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb10-12" class="hljs-ln-code"><a href="#cb10-12"></a>  <span class="fu">ggtitle</span>(<span class="st">"Normal distribution"</span>)</span>
-<span id="cb10-13" class="hljs-ln-code"><a href="#cb10-13"></a>p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># Seed for random number</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb10-3"><a href="#cb10-3"></a></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="co"># Normal distribution</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a>d1 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rnorm</span>(<span class="dv">10000</span>, <span class="dv">0</span>, <span class="dv">1</span>), <span class="at">dist =</span> <span class="st">"mean = 0, sd = 1"</span>)</span>
+<span id="cb10-6"><a href="#cb10-6"></a>d2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rnorm</span>(<span class="dv">10000</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="at">dist =</span> <span class="st">"mean = 1, sd = 1"</span>)</span>
+<span id="cb10-7"><a href="#cb10-7"></a>d3 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rnorm</span>(<span class="dv">10000</span>, <span class="dv">0</span>, <span class="dv">2</span>), <span class="at">dist =</span> <span class="st">"mean = 0, sd = 2"</span>)</span>
+<span id="cb10-8"><a href="#cb10-8"></a></span>
+<span id="cb10-9"><a href="#cb10-9"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">rbind</span>(d1, d2, d3), <span class="fu">aes</span>(<span class="at">x =</span> x)) <span class="sc">+</span> </span>
+<span id="cb10-10"><a href="#cb10-10"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">color =</span> dist, <span class="at">linetype =</span> dist), <span class="at">size =</span> <span class="fl">1.5</span>) <span class="sc">+</span> </span>
+<span id="cb10-11"><a href="#cb10-11"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Density"</span>, <span class="at">x =</span> <span class="st">"Variable x"</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb10-12"><a href="#cb10-12"></a>  <span class="fu">ggtitle</span>(<span class="st">"Normal distribution"</span>)</span>
+<span id="cb10-13"><a href="#cb10-13"></a>p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
 <img data-src="Bootcamp_slides_files/figure-revealjs/distributions2-1.png" width="960" class="r-stretch"></section>
-<section id="section-2" class="slide level2" data-auto-animate="true">
-<h2 data-id="quarto-animate-title"></h2>
+<section id="distributions-example-ii" class="slide level2">
+<h2>Distributions: Example II</h2>
 <div class="cell">
 <details>
 <summary>expand for full code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy" data-id="quarto-animate-code"><code class="sourceCode r hljs"><span id="cb11-1" class="hljs-ln-code"><a href="#cb11-1"></a><span class="co"># Chi Squared distribution</span></span>
-<span id="cb11-2" class="hljs-ln-code"><a href="#cb11-2"></a>d2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rchisq</span>(<span class="dv">10000</span>, <span class="dv">2</span>), <span class="at">dist =</span> <span class="st">"df = 2"</span>)</span>
-<span id="cb11-3" class="hljs-ln-code"><a href="#cb11-3"></a>d3 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rchisq</span>(<span class="dv">10000</span>, <span class="dv">4</span>), <span class="at">dist =</span> <span class="st">"df = 4"</span>)</span>
-<span id="cb11-4" class="hljs-ln-code"><a href="#cb11-4"></a>d4 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rchisq</span>(<span class="dv">10000</span>, <span class="dv">8</span>), <span class="at">dist =</span> <span class="st">"df = 8"</span>)</span>
-<span id="cb11-5" class="hljs-ln-code"><a href="#cb11-5"></a></span>
-<span id="cb11-6" class="hljs-ln-code"><a href="#cb11-6"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">rbind</span>(d2, d3, d4), <span class="fu">aes</span>(<span class="at">x =</span> x)) <span class="sc">+</span> </span>
-<span id="cb11-7" class="hljs-ln-code"><a href="#cb11-7"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">color =</span> dist, <span class="at">linetype =</span> dist), <span class="at">size =</span> <span class="fl">1.5</span>) <span class="sc">+</span> </span>
-<span id="cb11-8" class="hljs-ln-code"><a href="#cb11-8"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Density"</span>, <span class="at">x =</span> <span class="st">"Variable x"</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb11-9" class="hljs-ln-code"><a href="#cb11-9"></a>  <span class="fu">ggtitle</span>(<span class="st">"Chi-squared distribution"</span>)</span>
-<span id="cb11-10" class="hljs-ln-code"><a href="#cb11-10"></a>p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># Chi Squared distribution</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a>d2 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rchisq</span>(<span class="dv">10000</span>, <span class="dv">2</span>), <span class="at">dist =</span> <span class="st">"df = 2"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3"></a>d3 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rchisq</span>(<span class="dv">10000</span>, <span class="dv">4</span>), <span class="at">dist =</span> <span class="st">"df = 4"</span>)</span>
+<span id="cb11-4"><a href="#cb11-4"></a>d4 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="fu">rchisq</span>(<span class="dv">10000</span>, <span class="dv">8</span>), <span class="at">dist =</span> <span class="st">"df = 8"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5"></a></span>
+<span id="cb11-6"><a href="#cb11-6"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="fu">rbind</span>(d2, d3, d4), <span class="fu">aes</span>(<span class="at">x =</span> x)) <span class="sc">+</span> </span>
+<span id="cb11-7"><a href="#cb11-7"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">color =</span> dist, <span class="at">linetype =</span> dist), <span class="at">size =</span> <span class="fl">1.5</span>) <span class="sc">+</span> </span>
+<span id="cb11-8"><a href="#cb11-8"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Density"</span>, <span class="at">x =</span> <span class="st">"Variable x"</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a>  <span class="fu">ggtitle</span>(<span class="st">"Chi-squared distribution"</span>)</span>
+<span id="cb11-10"><a href="#cb11-10"></a>p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
 <img data-src="Bootcamp_slides_files/figure-revealjs/distributions3-1.png" width="960" class="r-stretch"></section>
-<section id="section-3" class="slide level2" data-auto-animate="true">
-<h2 data-id="quarto-animate-title"></h2>
+<section id="distributions-example-iii" class="slide level2">
+<h2>Distributions: Example III</h2>
 <h4 id="distributions-can-take-on-many-different-shapes">Distributions can take on many different shapes</h4>
 
 <img data-src="figs/Picture1.png" class="r-stretch"></section>
@@ -1005,14 +1003,21 @@ wage_i = \beta_0 + \beta_1 education_{i} + \beta_2 union_{i} +\epsilon_i
 <span id="cb17-10"><a href="#cb17-10"></a><span class="fu">set.seed</span>(<span class="dv">653210</span>)</span>
 <span id="cb17-11"><a href="#cb17-11"></a>wages_cs.df <span class="ot">&lt;-</span> wages_cs.df[<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">595</span>, <span class="dv">50</span>), ]</span>
 <span id="cb17-12"><a href="#cb17-12"></a></span>
-<span id="cb17-13"><a href="#cb17-13"></a><span class="co"># Plot with linear line</span></span>
-<span id="cb17-14"><a href="#cb17-14"></a>pl3 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(wages_cs.df, <span class="fu">aes</span>(<span class="at">x =</span> ed, <span class="at">y =</span> lwage, <span class="at">color =</span> union, <span class="at">shape =</span> union)) <span class="sc">+</span></span>
-<span id="cb17-15"><a href="#cb17-15"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="dv">1</span>) <span class="sc">+</span> </span>
-<span id="cb17-16"><a href="#cb17-16"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
-<span id="cb17-17"><a href="#cb17-17"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"log-transformed wage"</span>, <span class="at">x =</span> <span class="st">"Education years"</span>) <span class="sc">+</span></span>
-<span id="cb17-18"><a href="#cb17-18"></a>  <span class="fu">ggtitle</span>(<span class="st">"50 individuals from the Panel Study of Income Dynamics"</span>)</span>
-<span id="cb17-19"><a href="#cb17-19"></a></span>
-<span id="cb17-20"><a href="#cb17-20"></a>pl3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-13"><a href="#cb17-13"></a><span class="co"># Means</span></span>
+<span id="cb17-14"><a href="#cb17-14"></a>means.df <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(wages_cs.df[, <span class="fu">c</span>(<span class="st">"ed"</span>, <span class="st">"lwage"</span>)],</span>
+<span id="cb17-15"><a href="#cb17-15"></a>                      <span class="at">by =</span> <span class="fu">list</span>(<span class="at">union =</span> wages_cs.df<span class="sc">$</span>union),</span>
+<span id="cb17-16"><a href="#cb17-16"></a>                      <span class="at">FUN =</span> <span class="cf">function</span>(x) <span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb17-17"><a href="#cb17-17"></a></span>
+<span id="cb17-18"><a href="#cb17-18"></a><span class="co"># Plot with linear line</span></span>
+<span id="cb17-19"><a href="#cb17-19"></a>pl3 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(wages_cs.df, <span class="fu">aes</span>(<span class="at">x =</span> ed, <span class="at">y =</span> lwage, <span class="at">color =</span> union, <span class="at">shape =</span> union)) <span class="sc">+</span></span>
+<span id="cb17-20"><a href="#cb17-20"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb17-21"><a href="#cb17-21"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> means.df, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">color =</span> union), </span>
+<span id="cb17-22"><a href="#cb17-22"></a>             <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">stroke  =</span> <span class="dv">2</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">shape =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb17-23"><a href="#cb17-23"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb17-24"><a href="#cb17-24"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"log-transformed wage"</span>, <span class="at">x =</span> <span class="st">"Education years"</span>) <span class="sc">+</span></span>
+<span id="cb17-25"><a href="#cb17-25"></a>  <span class="fu">ggtitle</span>(<span class="st">"50 individuals from the Panel Study of Income Dynamics"</span>)</span>
+<span id="cb17-26"><a href="#cb17-26"></a></span>
+<span id="cb17-27"><a href="#cb17-27"></a>pl3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -1099,19 +1104,26 @@ F-statistic: 6.574 on 2 and 47 DF,  p-value: 0.003039</code></pre>
 <span id="cb20-34"><a href="#cb20-34"></a>                       <span class="at">union =</span> wages_cs.df<span class="sc">$</span>union,</span>
 <span id="cb20-35"><a href="#cb20-35"></a>                       <span class="at">resid =</span> <span class="dv">5</span>))</span>
 <span id="cb20-36"><a href="#cb20-36"></a></span>
-<span id="cb20-37"><a href="#cb20-37"></a></span>
-<span id="cb20-38"><a href="#cb20-38"></a><span class="co"># Plot with linear line</span></span>
-<span id="cb20-39"><a href="#cb20-39"></a>pl4 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> ed, <span class="at">y =</span> lwage, <span class="at">color =</span> union, <span class="at">shape =</span> union)) <span class="sc">+</span></span>
-<span id="cb20-40"><a href="#cb20-40"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="dv">1</span>) <span class="sc">+</span> </span>
-<span id="cb20-41"><a href="#cb20-41"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
-<span id="cb20-42"><a href="#cb20-42"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"log-transformed wage"</span>, <span class="at">x =</span> <span class="st">"Education years"</span>) <span class="sc">+</span></span>
-<span id="cb20-43"><a href="#cb20-43"></a>  <span class="fu">ggtitle</span>(<span class="st">"50 individuals from the Panel Study of Income Dynamics"</span>)<span class="sc">+</span></span>
-<span id="cb20-44"><a href="#cb20-44"></a>  <span class="fu">transition_states</span>(resid, <span class="at">wrap =</span> <span class="cn">FALSE</span>) <span class="sc">+</span> </span>
-<span id="cb20-45"><a href="#cb20-45"></a>  <span class="fu">shadow_mark</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">size =</span> <span class="dv">1</span>) </span>
-<span id="cb20-46"><a href="#cb20-46"></a>  <span class="co"># + view_zoom(nsteps = 3, include = TRUE, </span></span>
-<span id="cb20-47"><a href="#cb20-47"></a>  <span class="co">#           look_ahead = 4, wrap = FALSE)</span></span>
-<span id="cb20-48"><a href="#cb20-48"></a></span>
-<span id="cb20-49"><a href="#cb20-49"></a>pl4</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-37"><a href="#cb20-37"></a>means.df <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(df[, <span class="fu">c</span>(<span class="st">"lwage"</span>, <span class="st">"ed"</span>)],</span>
+<span id="cb20-38"><a href="#cb20-38"></a>                   <span class="at">by =</span> <span class="fu">list</span>(<span class="at">union =</span> df<span class="sc">$</span>union,</span>
+<span id="cb20-39"><a href="#cb20-39"></a>                             <span class="at">resid =</span> df<span class="sc">$</span>resid),</span>
+<span id="cb20-40"><a href="#cb20-40"></a>                  <span class="at">FUN =</span> <span class="cf">function</span>(x) <span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb20-41"><a href="#cb20-41"></a></span>
+<span id="cb20-42"><a href="#cb20-42"></a></span>
+<span id="cb20-43"><a href="#cb20-43"></a><span class="co"># Plot with linear line</span></span>
+<span id="cb20-44"><a href="#cb20-44"></a>pl4 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df, <span class="fu">aes</span>(<span class="at">x =</span> ed, <span class="at">y =</span> lwage, <span class="at">color =</span> union, <span class="at">shape =</span> union)) <span class="sc">+</span></span>
+<span id="cb20-45"><a href="#cb20-45"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb20-46"><a href="#cb20-46"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> means.df, </span>
+<span id="cb20-47"><a href="#cb20-47"></a>             <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">stroke  =</span> <span class="dv">2</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb20-48"><a href="#cb20-48"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb20-49"><a href="#cb20-49"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"log-transformed wage"</span>, <span class="at">x =</span> <span class="st">"Education years"</span>) <span class="sc">+</span></span>
+<span id="cb20-50"><a href="#cb20-50"></a>  <span class="fu">ggtitle</span>(<span class="st">"50 individuals from the Panel Study of Income Dynamics"</span>)<span class="sc">+</span></span>
+<span id="cb20-51"><a href="#cb20-51"></a>  <span class="fu">transition_states</span>(resid, <span class="at">wrap =</span> <span class="cn">FALSE</span>) <span class="sc">+</span> </span>
+<span id="cb20-52"><a href="#cb20-52"></a>  <span class="fu">shadow_mark</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">size =</span> <span class="dv">1</span>) </span>
+<span id="cb20-53"><a href="#cb20-53"></a>  <span class="co"># + view_zoom(nsteps = 3, include = TRUE, </span></span>
+<span id="cb20-54"><a href="#cb20-54"></a>  <span class="co">#           look_ahead = 4, wrap = FALSE)</span></span>
+<span id="cb20-55"><a href="#cb20-55"></a></span>
+<span id="cb20-56"><a href="#cb20-56"></a>pl4</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -1121,14 +1133,21 @@ F-statistic: 6.574 on 2 and 47 DF,  p-value: 0.003039</code></pre>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># Plot with linear line</span></span>
-<span id="cb21-2"><a href="#cb21-2"></a>pl5_0 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(wages_cs.df, <span class="fu">aes</span>(<span class="at">x =</span> ed_resid, <span class="at">y =</span> lwage_resid)) <span class="sc">+</span></span>
-<span id="cb21-3"><a href="#cb21-3"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="dv">1</span>) <span class="sc">+</span> </span>
-<span id="cb21-4"><a href="#cb21-4"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
-<span id="cb21-5"><a href="#cb21-5"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"residualized log-transformed wage"</span>, <span class="at">x =</span> <span class="st">"residualized Education years"</span>) <span class="sc">+</span></span>
-<span id="cb21-6"><a href="#cb21-6"></a>  <span class="fu">ggtitle</span>(<span class="st">"50 individuals from the Panel Study of Income Dynamics"</span>)</span>
-<span id="cb21-7"><a href="#cb21-7"></a></span>
-<span id="cb21-8"><a href="#cb21-8"></a>pl5_0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a><span class="co"># Means</span></span>
+<span id="cb21-2"><a href="#cb21-2"></a>means.df <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(wages_cs.df[, <span class="fu">c</span>(<span class="st">"ed_resid"</span>, <span class="st">"lwage_resid"</span>)],</span>
+<span id="cb21-3"><a href="#cb21-3"></a>                      <span class="at">by =</span> <span class="fu">list</span>(<span class="at">union =</span> wages_cs.df<span class="sc">$</span>union),</span>
+<span id="cb21-4"><a href="#cb21-4"></a>                      <span class="at">FUN =</span> <span class="cf">function</span>(x) <span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb21-5"><a href="#cb21-5"></a></span>
+<span id="cb21-6"><a href="#cb21-6"></a><span class="co"># Plot with linear line</span></span>
+<span id="cb21-7"><a href="#cb21-7"></a>pl5_0 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(wages_cs.df, <span class="fu">aes</span>(<span class="at">x =</span> ed_resid, <span class="at">y =</span> lwage_resid)) <span class="sc">+</span></span>
+<span id="cb21-8"><a href="#cb21-8"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> union, <span class="at">shape =</span> union), <span class="at">alpha =</span> <span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb21-9"><a href="#cb21-9"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> means.df, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">color =</span> union), </span>
+<span id="cb21-10"><a href="#cb21-10"></a>             <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">stroke  =</span> <span class="dv">2</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">shape =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb21-11"><a href="#cb21-11"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb21-12"><a href="#cb21-12"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"residualized log-transformed wage"</span>, <span class="at">x =</span> <span class="st">"residualized Education years"</span>) <span class="sc">+</span></span>
+<span id="cb21-13"><a href="#cb21-13"></a>  <span class="fu">ggtitle</span>(<span class="st">"50 individuals from the Panel Study of Income Dynamics"</span>)</span>
+<span id="cb21-14"><a href="#cb21-14"></a></span>
+<span id="cb21-15"><a href="#cb21-15"></a>pl5_0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -1151,16 +1170,18 @@ F-statistic: 6.574 on 2 and 47 DF,  p-value: 0.003039</code></pre>
 <span id="cb22-11"><a href="#cb22-11"></a></span>
 <span id="cb22-12"><a href="#cb22-12"></a><span class="co"># Plot with linear line</span></span>
 <span id="cb22-13"><a href="#cb22-13"></a>pl5 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(wages_cs.df, <span class="fu">aes</span>(<span class="at">x =</span> ed_resid, <span class="at">y =</span> lwage_resid)) <span class="sc">+</span></span>
-<span id="cb22-14"><a href="#cb22-14"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="dv">1</span>) <span class="sc">+</span> </span>
-<span id="cb22-15"><a href="#cb22-15"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">group =</span> <span class="dv">1</span>), <span class="at">method =</span> <span class="st">'lm'</span>, <span class="at">show.legend =</span> <span class="st">"none"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb22-16"><a href="#cb22-16"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">xend =</span> ed_resid, <span class="at">yend =</span> predicted), <span class="at">alpha =</span> .<span class="dv">2</span>, <span class="at">color =</span> <span class="st">"purple"</span>) <span class="sc">+</span></span>
-<span id="cb22-17"><a href="#cb22-17"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> ed_resid, <span class="at">y =</span> predicted), <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">shape =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span> </span>
-<span id="cb22-18"><a href="#cb22-18"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
-<span id="cb22-19"><a href="#cb22-19"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"residualized log-transformed wage"</span>, <span class="at">x =</span> <span class="st">"residualized Education years"</span>) <span class="sc">+</span></span>
-<span id="cb22-20"><a href="#cb22-20"></a>  <span class="fu">ggtitle</span>(<span class="st">"50 individuals from the Panel Study of Income Dynamics"</span>) <span class="sc">+</span></span>
-<span id="cb22-21"><a href="#cb22-21"></a>  <span class="fu">stat_regline_equation</span>(<span class="fu">aes</span>(<span class="at">label =</span> ..eq.label..))</span>
-<span id="cb22-22"><a href="#cb22-22"></a></span>
-<span id="cb22-23"><a href="#cb22-23"></a>pl5</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-14"><a href="#cb22-14"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> union, <span class="at">shape =</span> union), <span class="at">alpha =</span> <span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb22-15"><a href="#cb22-15"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> means.df, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">color =</span> union), </span>
+<span id="cb22-16"><a href="#cb22-16"></a>             <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">stroke  =</span> <span class="dv">2</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">shape =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb22-17"><a href="#cb22-17"></a>  <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">group =</span> <span class="dv">1</span>), <span class="at">method =</span> <span class="st">'lm'</span>, <span class="at">show.legend =</span> <span class="st">"none"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb22-18"><a href="#cb22-18"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">xend =</span> ed_resid, <span class="at">yend =</span> predicted), <span class="at">alpha =</span> .<span class="dv">2</span>, <span class="at">color =</span> <span class="st">"purple"</span>) <span class="sc">+</span></span>
+<span id="cb22-19"><a href="#cb22-19"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> ed_resid, <span class="at">y =</span> predicted), <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">shape =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span> </span>
+<span id="cb22-20"><a href="#cb22-20"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb22-21"><a href="#cb22-21"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"residualized log-transformed wage"</span>, <span class="at">x =</span> <span class="st">"residualized Education years"</span>) <span class="sc">+</span></span>
+<span id="cb22-22"><a href="#cb22-22"></a>  <span class="fu">ggtitle</span>(<span class="st">"50 individuals from the Panel Study of Income Dynamics"</span>) <span class="sc">+</span></span>
+<span id="cb22-23"><a href="#cb22-23"></a>  <span class="fu">stat_regline_equation</span>(<span class="fu">aes</span>(<span class="at">label =</span> ..eq.label..))</span>
+<span id="cb22-24"><a href="#cb22-24"></a></span>
+<span id="cb22-25"><a href="#cb22-25"></a>pl5</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 
 </div>
@@ -1287,16 +1308,16 @@ F-statistic: 6.574 on 2 and 47 DF,  p-value: 0.003039</code></pre>
 </ul></li>
 </ol>
 </section>
-<section id="section-4" class="slide level2 smaller" data-auto-animate="true">
-<h2 data-id="quarto-animate-title"></h2>
+<section id="do-file-dos-and-donts-1" class="slide level2 smaller">
+<h2>Do File Dos and Don’ts</h2>
 
 <img data-src="figs/Stata9.png" class="r-stretch"><ol start="2" type="1">
 <li>Break down code into clearly labelled sections / subsections</li>
 <li>Use tab indentations to making things easy to read</li>
 </ol>
 </section>
-<section id="section-5" class="slide level2 smaller" data-auto-animate="true">
-<h2 data-id="quarto-animate-title"></h2>
+<section id="do-file-dos-and-donts-2" class="slide level2 smaller">
+<h2>Do File Dos and Don’ts</h2>
 
 <img data-src="figs/Stata10.png" class="r-stretch"><ol start="4" type="1">
 <li>Don’t put too much information on a single line</li>
@@ -1328,7 +1349,7 @@ F-statistic: 6.574 on 2 and 47 DF,  p-value: 0.003039</code></pre>
 </ul>
 </div>
 </section>
-<section id="section-6" class="slide level2" data-auto-animate="true">
+<section id="section" class="slide level2" data-auto-animate="true">
 <h2 data-id="quarto-animate-title"></h2>
 
 <img data-src="figs/Stata11.png" class="r-stretch"><p>In nearly all cases, Stata syntax consists of four parts:</p>
@@ -1452,6 +1473,18 @@ F-statistic: 6.574 on 2 and 47 DF,  p-value: 0.003039</code></pre>
 <h2>“?[command]” is your friend</h2>
 
 <img data-src="figs/R2.png" class="r-stretch"><div class="sourceCode" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a>?seq</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="define-your-working-directory" class="slide level2 smaller">
+<h2>Define your working directory</h2>
+<p>This is a path: “C:/work/Lehre/Bootcamp_slides/” (look the slash direction)</p>
+
+<img data-src="figs/file.png" class="r-stretch"></section>
+<section id="define-your-working-directory-1" class="slide level2">
+<h2>Define your working directory</h2>
+<h4 id="stata">Stata</h4>
+<div class="sourceCode" id="cb37"><pre class="sourceCode numberSource stata number-lines code-with-copy"><code class="sourceCode stata"><span id="cb37-1"><a href="#cb37-1"></a>cd <span class="st">"C:/work/Lehre/Bootcamp_slides/"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<h4 id="r">R</h4>
+<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a><span class="fu">setwd</span>(<span class="st">'C:/work/Lehre/Bootcamp_slides/'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="there-are-a-lot-of-helpful-resources" class="slide level2">
 <h2>There are a lot of helpful resources</h2>
